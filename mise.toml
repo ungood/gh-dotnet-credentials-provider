@@ -1,0 +1,26 @@
+[tools]
+dotnet = "10"
+
+[tasks.build]
+description = "Build the solution"
+run = "dotnet build"
+
+[tasks.build-release]
+description = "Build the solution in Release configuration"
+run = "dotnet build -c Release"
+
+[tasks.test]
+description = "Run all tests"
+run = "dotnet test"
+
+[tasks.clean]
+description = "Clean build artifacts"
+run = "dotnet clean"
+
+[tasks.restore]
+description = "Restore NuGet packages"
+run = "dotnet restore"
+
+[tasks.run]
+description = "Run the built credential provider DLL"
+run = "dotnet src/GhCredentialProvider/bin/Debug/net10.0/GhCredentialProvider.dll"
