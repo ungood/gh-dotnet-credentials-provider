@@ -10,13 +10,5 @@ public enum MessageType
     SetLogLevel,
     Close,
     Log,
-    MonitorNuGetProcessExit
-}
-
-public enum ResponseCode
-{
-    Success,
-    Error,
-    NotFound,
-    Unsupported
+    MonitorNuGetProcessExit,
 }
