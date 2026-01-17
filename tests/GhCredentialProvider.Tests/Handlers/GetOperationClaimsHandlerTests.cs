@@ -13,15 +13,25 @@ public class GetOperationClaimsHandlerTests
         var handler = new GetOperationClaimsHandler();
         var requestPayload = new GetOperationClaimsRequest(
             "https://nuget.pkg.github.com/owner/index.json",
-            JObject.FromObject(new { PackageSourceRepository = "https://nuget.pkg.github.com/owner/index.json" }));
+            JObject.FromObject(
+                new { PackageSourceRepository = "https://nuget.pkg.github.com/owner/index.json" }
+            )
+        );
         var payloadJson = JObject.FromObject(requestPayload);
-        var request = new Message("claims-789", MessageType.Request, MessageMethod.GetOperationClaims, payloadJson);
+        var request = new Message(
+            "claims-789",
+            MessageType.Request,
+            MessageMethod.GetOperationClaims,
+            payloadJson
+        );
 
         var response = await handler.HandleAsync(request);
 
         Assert.NotNull(response);
         Assert.Equal(MessageType.Response, response.Type);
-        var responsePayload = MessageUtilities.DeserializePayload<GetOperationClaimsResponse>(response);
+        var responsePayload = MessageUtilities.DeserializePayload<GetOperationClaimsResponse>(
+            response
+        );
         Assert.NotNull(responsePayload);
         Assert.Single(responsePayload.Claims);
         Assert.Equal(OperationClaim.Authentication, responsePayload.Claims.First());
@@ -33,15 +43,25 @@ public class GetOperationClaimsHandlerTests
         var handler = new GetOperationClaimsHandler();
         var requestPayload = new GetOperationClaimsRequest(
             "https://api.nuget.org/v3/index.json",
-            JObject.FromObject(new { PackageSourceRepository = "https://api.nuget.org/v3/index.json" }));
+            JObject.FromObject(
+                new { PackageSourceRepository = "https://api.nuget.org/v3/index.json" }
+            )
+        );
         var payloadJson = JObject.FromObject(requestPayload);
-        var request = new Message("claims-789", MessageType.Request, MessageMethod.GetOperationClaims, payloadJson);
+        var request = new Message(
+            "claims-789",
+            MessageType.Request,
+            MessageMethod.GetOperationClaims,
+            payloadJson
+        );
 
         var response = await handler.HandleAsync(request);
 
         Assert.NotNull(response);
         Assert.Equal(MessageType.Response, response.Type);
-        var responsePayload = MessageUtilities.DeserializePayload<GetOperationClaimsResponse>(response);
+        var responsePayload = MessageUtilities.DeserializePayload<GetOperationClaimsResponse>(
+            response
+        );
         Assert.NotNull(responsePayload);
         Assert.Empty(responsePayload.Claims);
     }
@@ -52,15 +72,25 @@ public class GetOperationClaimsHandlerTests
         var handler = new GetOperationClaimsHandler();
         var requestPayload = new GetOperationClaimsRequest(
             "https://ghe.company.com/nuget/index.json",
-            JObject.FromObject(new { PackageSourceRepository = "https://ghe.company.com/nuget/index.json" }));
+            JObject.FromObject(
+                new { PackageSourceRepository = "https://ghe.company.com/nuget/index.json" }
+            )
+        );
         var payloadJson = JObject.FromObject(requestPayload);
-        var request = new Message("claims-789", MessageType.Request, MessageMethod.GetOperationClaims, payloadJson);
+        var request = new Message(
+            "claims-789",
+            MessageType.Request,
+            MessageMethod.GetOperationClaims,
+            payloadJson
+        );
 
         var response = await handler.HandleAsync(request);
 
         Assert.NotNull(response);
         Assert.Equal(MessageType.Response, response.Type);
-        var responsePayload = MessageUtilities.DeserializePayload<GetOperationClaimsResponse>(response);
+        var responsePayload = MessageUtilities.DeserializePayload<GetOperationClaimsResponse>(
+            response
+        );
         Assert.NotNull(responsePayload);
         Assert.Single(responsePayload.Claims);
         Assert.Equal(OperationClaim.Authentication, responsePayload.Claims.First());
@@ -72,15 +102,23 @@ public class GetOperationClaimsHandlerTests
         var handler = new GetOperationClaimsHandler();
         var requestPayload = new GetOperationClaimsRequest(
             "https://nuget.pkg.github.com/owner/index.json",
-            null);
+            null
+        );
         var payloadJson = JObject.FromObject(requestPayload);
-        var request = new Message("claims-789", MessageType.Request, MessageMethod.GetOperationClaims, payloadJson);
+        var request = new Message(
+            "claims-789",
+            MessageType.Request,
+            MessageMethod.GetOperationClaims,
+            payloadJson
+        );
 
         var response = await handler.HandleAsync(request);
 
         Assert.NotNull(response);
         Assert.Equal(MessageType.Response, response.Type);
-        var responsePayload = MessageUtilities.DeserializePayload<GetOperationClaimsResponse>(response);
+        var responsePayload = MessageUtilities.DeserializePayload<GetOperationClaimsResponse>(
+            response
+        );
         Assert.NotNull(responsePayload);
         Assert.Single(responsePayload.Claims);
         Assert.Equal(OperationClaim.Authentication, responsePayload.Claims.First());

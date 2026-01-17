@@ -3,8 +3,8 @@ using GhCredentialProvider.GitHub;
 using GhCredentialProvider.Handlers;
 using GhCredentialProvider.Plugin;
 using Newtonsoft.Json;
-using NuGet.Protocol.Plugins;
 using NSubstitute;
+using NuGet.Protocol.Plugins;
 using Xunit;
 
 namespace GhCredentialProvider.Tests.Integration;
@@ -16,7 +16,8 @@ public class FullProtocolFlowTests
     {
         // Setup
         var tokenProvider = Substitute.For<ITokenProvider>();
-        tokenProvider.GetTokenAsync("github.com", Arg.Any<CancellationToken>())
+        tokenProvider
+            .GetTokenAsync("github.com", Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<string?>("ghp_testtoken123"));
 
         var handlers = new Dictionary<Type, IMessageHandler>
@@ -24,7 +25,10 @@ public class FullProtocolFlowTests
             { typeof(HandshakeRequest), new HandshakeHandler() },
             { typeof(InitializeRequest), new InitializeHandler() },
             { typeof(GetOperationClaimsRequest), new GetOperationClaimsHandler() },
-            { typeof(GetAuthenticationCredentialsRequest), new GetAuthenticationCredentialsHandler(tokenProvider) }
+            {
+                typeof(GetAuthenticationCredentialsRequest),
+                new GetAuthenticationCredentialsHandler(tokenProvider)
+            },
         };
 
         var dispatcher = new PluginMessageDispatcher(handlers);
@@ -32,14 +36,62 @@ public class FullProtocolFlowTests
         // Simulate protocol messages as JSON strings
         var messages = new List<string>
         {
-            JsonConvert.SerializeObject(new Message("handshake-1", MessageType.Request, MessageMethod.Handshake, 
-                Newtonsoft.Json.Linq.JObject.FromObject(new HandshakeRequest(NuGet.Versioning.SemanticVersion.Parse("2.0.0"), NuGet.Versioning.SemanticVersion.Parse("2.0.0"))))),
-            JsonConvert.SerializeObject(new Message("init-1", MessageType.Request, MessageMethod.Initialize,
-                Newtonsoft.Json.Linq.JObject.FromObject(new InitializeRequest("6.0.0", "en-US", TimeSpan.FromSeconds(5))))),
-            JsonConvert.SerializeObject(new Message("claims-1", MessageType.Request, MessageMethod.GetOperationClaims,
-                Newtonsoft.Json.Linq.JObject.FromObject(new GetOperationClaimsRequest("https://nuget.pkg.github.com/owner/index.json", Newtonsoft.Json.Linq.JObject.FromObject(new { PackageSourceRepository = "https://nuget.pkg.github.com/owner/index.json" }))))),
-            JsonConvert.SerializeObject(new Message("auth-1", MessageType.Request, MessageMethod.GetAuthenticationCredentials,
-                Newtonsoft.Json.Linq.JObject.FromObject(new GetAuthenticationCredentialsRequest(new Uri("https://nuget.pkg.github.com/owner/index.json"), isRetry: false, isNonInteractive: true, canShowDialog: false))))
+            JsonConvert.SerializeObject(
+                new Message(
+                    "handshake-1",
+                    MessageType.Request,
+                    MessageMethod.Handshake,
+                    Newtonsoft.Json.Linq.JObject.FromObject(
+                        new HandshakeRequest(
+                            NuGet.Versioning.SemanticVersion.Parse("2.0.0"),
+                            NuGet.Versioning.SemanticVersion.Parse("2.0.0")
+                        )
+                    )
+                )
+            ),
+            JsonConvert.SerializeObject(
+                new Message(
+                    "init-1",
+                    MessageType.Request,
+                    MessageMethod.Initialize,
+                    Newtonsoft.Json.Linq.JObject.FromObject(
+                        new InitializeRequest("6.0.0", "en-US", TimeSpan.FromSeconds(5))
+                    )
+                )
+            ),
+            JsonConvert.SerializeObject(
+                new Message(
+                    "claims-1",
+                    MessageType.Request,
+                    MessageMethod.GetOperationClaims,
+                    Newtonsoft.Json.Linq.JObject.FromObject(
+                        new GetOperationClaimsRequest(
+                            "https://nuget.pkg.github.com/owner/index.json",
+                            Newtonsoft.Json.Linq.JObject.FromObject(
+                                new
+                                {
+                                    PackageSourceRepository = "https://nuget.pkg.github.com/owner/index.json",
+                                }
+                            )
+                        )
+                    )
+                )
+            ),
+            JsonConvert.SerializeObject(
+                new Message(
+                    "auth-1",
+                    MessageType.Request,
+                    MessageMethod.GetAuthenticationCredentials,
+                    Newtonsoft.Json.Linq.JObject.FromObject(
+                        new GetAuthenticationCredentialsRequest(
+                            new Uri("https://nuget.pkg.github.com/owner/index.json"),
+                            isRetry: false,
+                            isNonInteractive: true,
+                            canShowDialog: false
+                        )
+                    )
+                )
+            ),
         };
 
         var inputStream = new MemoryStream();

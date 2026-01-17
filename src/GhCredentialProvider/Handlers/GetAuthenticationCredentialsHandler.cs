@@ -13,9 +13,14 @@ public class GetAuthenticationCredentialsHandler : IMessageHandler
         _tokenProvider = tokenProvider;
     }
 
-    public async Task<Message> HandleAsync(Message request, CancellationToken cancellationToken = default)
+    public async Task<Message> HandleAsync(
+        Message request,
+        CancellationToken cancellationToken = default
+    )
     {
-        var payload = MessageUtilities.DeserializePayload<GetAuthenticationCredentialsRequest>(request);
+        var payload = MessageUtilities.DeserializePayload<GetAuthenticationCredentialsRequest>(
+            request
+        );
         if (payload == null)
         {
             return CreateErrorResponse(request.RequestId, "Invalid request");
@@ -38,12 +43,16 @@ public class GetAuthenticationCredentialsHandler : IMessageHandler
         {
             if (payload.IsNonInteractive)
             {
-                return CreateErrorResponse(request.RequestId, 
-                    "No GitHub token available and non-interactive mode is enabled. Set GH_TOKEN or GITHUB_TOKEN environment variable, or run 'gh auth login'.");
+                return CreateErrorResponse(
+                    request.RequestId,
+                    "No GitHub token available and non-interactive mode is enabled. Set GH_TOKEN or GITHUB_TOKEN environment variable, or run 'gh auth login'."
+                );
             }
 
-            return CreateErrorResponse(request.RequestId, 
-                "Unable to retrieve GitHub token. Ensure 'gh' CLI is installed and authenticated, or set GH_TOKEN or GITHUB_TOKEN environment variable.");
+            return CreateErrorResponse(
+                request.RequestId,
+                "Unable to retrieve GitHub token. Ensure 'gh' CLI is installed and authenticated, or set GH_TOKEN or GITHUB_TOKEN environment variable."
+            );
         }
 
         // Return credentials
@@ -55,7 +64,12 @@ public class GetAuthenticationCredentialsHandler : IMessageHandler
             responseCode: MessageResponseCode.Success
         );
         var payloadJson = JObject.FromObject(response);
-        return new Message(request.RequestId, MessageType.Response, MessageMethod.GetAuthenticationCredentials, payloadJson);
+        return new Message(
+            request.RequestId,
+            MessageType.Response,
+            MessageMethod.GetAuthenticationCredentials,
+            payloadJson
+        );
     }
 
     private static Message CreateErrorResponse(string requestId, string message)
@@ -68,6 +82,11 @@ public class GetAuthenticationCredentialsHandler : IMessageHandler
             responseCode: MessageResponseCode.Error
         );
         var payloadJson = JObject.FromObject(errorResponse);
-        return new Message(requestId, MessageType.Response, MessageMethod.GetAuthenticationCredentials, payloadJson);
+        return new Message(
+            requestId,
+            MessageType.Response,
+            MessageMethod.GetAuthenticationCredentials,
+            payloadJson
+        );
     }
 }

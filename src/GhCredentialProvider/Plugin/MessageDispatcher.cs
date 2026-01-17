@@ -13,7 +13,7 @@ public class PluginMessageDispatcher
         { MessageMethod.Initialize, typeof(InitializeRequest) },
         { MessageMethod.GetOperationClaims, typeof(GetOperationClaimsRequest) },
         { MessageMethod.GetAuthenticationCredentials, typeof(GetAuthenticationCredentialsRequest) },
-        { MessageMethod.SetLogLevel, typeof(SetLogLevelRequest) }
+        { MessageMethod.SetLogLevel, typeof(SetLogLevelRequest) },
     };
 
     public PluginMessageDispatcher(Dictionary<Type, IMessageHandler> handlers)
@@ -21,7 +21,10 @@ public class PluginMessageDispatcher
         _handlers = handlers;
     }
 
-    public async Task<Message?> DispatchAsync(Message request, CancellationToken cancellationToken = default)
+    public async Task<Message?> DispatchAsync(
+        Message request,
+        CancellationToken cancellationToken = default
+    )
     {
         // Get the request type from the message method
         if (!MessageMethodToRequestType.TryGetValue(request.Method, out var requestType))
@@ -29,7 +32,12 @@ public class PluginMessageDispatcher
             // Return unsupported response
             var errorResponse = new InitializeResponse(MessageResponseCode.Error);
             var payloadJson = JObject.FromObject(errorResponse);
-            return new Message(request.RequestId, MessageType.Response, request.Method, payloadJson);
+            return new Message(
+                request.RequestId,
+                MessageType.Response,
+                request.Method,
+                payloadJson
+            );
         }
 
         // Route by request type
@@ -41,6 +49,11 @@ public class PluginMessageDispatcher
         // Return unsupported response
         var unsupportedResponse = new InitializeResponse(MessageResponseCode.Error);
         var unsupportedPayloadJson = JObject.FromObject(unsupportedResponse);
-        return new Message(request.RequestId, MessageType.Response, request.Method, unsupportedPayloadJson);
+        return new Message(
+            request.RequestId,
+            MessageType.Response,
+            request.Method,
+            unsupportedPayloadJson
+        );
     }
 }

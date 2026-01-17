@@ -18,7 +18,14 @@ public class SetLogLevelHandler : IMessageHandler
 
         var response = new SetLogLevelResponse(MessageResponseCode.Success);
         var payloadJson = JObject.FromObject(response);
-        return Task.FromResult(new Message(request.RequestId, MessageType.Response, MessageMethod.SetLogLevel, payloadJson));
+        return Task.FromResult(
+            new Message(
+                request.RequestId,
+                MessageType.Response,
+                MessageMethod.SetLogLevel,
+                payloadJson
+            )
+        );
     }
 
     private static Message CreateErrorResponse(string requestId)

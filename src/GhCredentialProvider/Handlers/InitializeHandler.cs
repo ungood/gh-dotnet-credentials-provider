@@ -18,7 +18,14 @@ public class InitializeHandler : IMessageHandler
 
         var response = new InitializeResponse(MessageResponseCode.Success);
         var payloadJson = JObject.FromObject(response);
-        return Task.FromResult(new Message(request.RequestId, MessageType.Response, MessageMethod.Initialize, payloadJson));
+        return Task.FromResult(
+            new Message(
+                request.RequestId,
+                MessageType.Response,
+                MessageMethod.Initialize,
+                payloadJson
+            )
+        );
     }
 
     private static Message CreateErrorResponse(string requestId)

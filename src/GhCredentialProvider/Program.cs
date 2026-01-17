@@ -13,8 +13,12 @@ class Program
         if (args.Length == 0 || args[0] != "-Plugin")
         {
             Console.WriteLine("GitHub NuGet Credential Provider");
-            Console.WriteLine("This is a NuGet cross-platform plugin. It should be invoked by NuGet client tools.");
-            Console.WriteLine("For more information, see: https://learn.microsoft.com/en-us/nuget/reference/extensibility/nuget-cross-platform-plugins");
+            Console.WriteLine(
+                "This is a NuGet cross-platform plugin. It should be invoked by NuGet client tools."
+            );
+            Console.WriteLine(
+                "For more information, see: https://learn.microsoft.com/en-us/nuget/reference/extensibility/nuget-cross-platform-plugins"
+            );
             return 1;
         }
 
@@ -29,8 +33,11 @@ class Program
                 { typeof(HandshakeRequest), new HandshakeHandler() },
                 { typeof(InitializeRequest), new InitializeHandler() },
                 { typeof(GetOperationClaimsRequest), new GetOperationClaimsHandler() },
-                { typeof(GetAuthenticationCredentialsRequest), new GetAuthenticationCredentialsHandler(tokenProvider) },
-                { typeof(SetLogLevelRequest), new SetLogLevelHandler() }
+                {
+                    typeof(GetAuthenticationCredentialsRequest),
+                    new GetAuthenticationCredentialsHandler(tokenProvider)
+                },
+                { typeof(SetLogLevelRequest), new SetLogLevelHandler() },
             };
 
             // Create dispatcher

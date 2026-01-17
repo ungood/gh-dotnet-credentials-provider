@@ -12,9 +12,17 @@ public class HandshakeHandlerTests
     public async Task HandleAsync_WithValidProtocolVersion_ReturnsSuccess()
     {
         var handler = new HandshakeHandler();
-        var requestPayload = new HandshakeRequest(SemanticVersion.Parse("2.0.0"), SemanticVersion.Parse("2.0.0"));
+        var requestPayload = new HandshakeRequest(
+            SemanticVersion.Parse("2.0.0"),
+            SemanticVersion.Parse("2.0.0")
+        );
         var payloadJson = JObject.FromObject(requestPayload);
-        var request = new Message("test-123", MessageType.Request, MessageMethod.Handshake, payloadJson);
+        var request = new Message(
+            "test-123",
+            MessageType.Request,
+            MessageMethod.Handshake,
+            payloadJson
+        );
 
         var response = await handler.HandleAsync(request);
 
@@ -47,9 +55,17 @@ public class HandshakeHandlerTests
     public async Task HandleAsync_WithUnsupportedProtocolVersion_ReturnsError()
     {
         var handler = new HandshakeHandler();
-        var requestPayload = new HandshakeRequest(SemanticVersion.Parse("1.0.0"), SemanticVersion.Parse("1.0.0"));
+        var requestPayload = new HandshakeRequest(
+            SemanticVersion.Parse("1.0.0"),
+            SemanticVersion.Parse("1.0.0")
+        );
         var payloadJson = JObject.FromObject(requestPayload);
-        var request = new Message("test-123", MessageType.Request, MessageMethod.Handshake, payloadJson);
+        var request = new Message(
+            "test-123",
+            MessageType.Request,
+            MessageMethod.Handshake,
+            payloadJson
+        );
 
         var response = await handler.HandleAsync(request);
 

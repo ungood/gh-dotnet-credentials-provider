@@ -4,12 +4,16 @@ namespace GhCredentialProvider.GitHub;
 
 public class GitHubCliTokenProvider : ITokenProvider
 {
-    public async Task<string?> GetTokenAsync(string hostname, CancellationToken cancellationToken = default)
+    public async Task<string?> GetTokenAsync(
+        string hostname,
+        CancellationToken cancellationToken = default
+    )
     {
         // First, check environment variables
-        var envToken = Environment.GetEnvironmentVariable("GH_TOKEN") 
-                       ?? Environment.GetEnvironmentVariable("GITHUB_TOKEN");
-        
+        var envToken =
+            Environment.GetEnvironmentVariable("GH_TOKEN")
+            ?? Environment.GetEnvironmentVariable("GITHUB_TOKEN");
+
         if (!string.IsNullOrWhiteSpace(envToken))
         {
             return envToken.Trim();
@@ -25,7 +29,7 @@ public class GitHubCliTokenProvider : ITokenProvider
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
-                CreateNoWindow = true
+                CreateNoWindow = true,
             };
 
             using var process = new Process { StartInfo = processStartInfo };

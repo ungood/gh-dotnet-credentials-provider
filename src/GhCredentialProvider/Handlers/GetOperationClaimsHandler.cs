@@ -17,8 +17,9 @@ public class GetOperationClaimsHandler : IMessageHandler
         // Check if the package source is a GitHub host
         var packageSource = payload.PackageSourceRepository?.ToString() ?? "";
         var serviceIndex = payload.ServiceIndex?.ToString() ?? "";
-        var isGitHub = GitHubHostDetector.IsGitHubHost(packageSource) ||
-                       GitHubHostDetector.IsGitHubHost(serviceIndex);
+        var isGitHub =
+            GitHubHostDetector.IsGitHubHost(packageSource)
+            || GitHubHostDetector.IsGitHubHost(serviceIndex);
 
         var claims = new List<OperationClaim>();
         if (isGitHub)
@@ -28,13 +29,25 @@ public class GetOperationClaimsHandler : IMessageHandler
 
         var response = new GetOperationClaimsResponse(claims);
         var payloadJson = JObject.FromObject(response);
-        return Task.FromResult(new Message(request.RequestId, MessageType.Response, MessageMethod.GetOperationClaims, payloadJson));
+        return Task.FromResult(
+            new Message(
+                request.RequestId,
+                MessageType.Response,
+                MessageMethod.GetOperationClaims,
+                payloadJson
+            )
+        );
     }
 
     private static Message CreateErrorResponse(string requestId)
     {
         var errorResponse = new GetOperationClaimsResponse(new List<OperationClaim>());
         var payloadJson = JObject.FromObject(errorResponse);
-        return new Message(requestId, MessageType.Response, MessageMethod.GetOperationClaims, payloadJson);
+        return new Message(
+            requestId,
+            MessageType.Response,
+            MessageMethod.GetOperationClaims,
+            payloadJson
+        );
     }
 }

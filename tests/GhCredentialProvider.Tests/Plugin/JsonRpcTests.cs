@@ -9,7 +9,9 @@ public class JsonRpcTests
     [Fact]
     public async Task ReadLineAsync_ReadsHandshakeRequest()
     {
-        var requestJson = """{"RequestType":2,"RequestId":"test-123","ProtocolVersion":"2.0.0","MinimumProtocolVersion":"2.0.0"}""" + "\n";
+        var requestJson =
+            """{"RequestType":2,"RequestId":"test-123","ProtocolVersion":"2.0.0","MinimumProtocolVersion":"2.0.0"}"""
+            + "\n";
         var inputStream = new MemoryStream(Encoding.UTF8.GetBytes(requestJson));
         var outputStream = new MemoryStream();
         var rpc = new JsonRpc(inputStream, outputStream);
@@ -24,7 +26,9 @@ public class JsonRpcTests
     [Fact]
     public async Task ReadLineAsync_ReadsGetAuthenticationCredentialsRequest()
     {
-        var requestJson = """{"RequestType":4,"RequestId":"auth-101","Uri":"https://nuget.pkg.github.com/owner/index.json","IsRetry":false,"NonInteractive":true,"CanShowDialog":false}""" + "\n";
+        var requestJson =
+            """{"RequestType":4,"RequestId":"auth-101","Uri":"https://nuget.pkg.github.com/owner/index.json","IsRetry":false,"NonInteractive":true,"CanShowDialog":false}"""
+            + "\n";
         var inputStream = new MemoryStream(Encoding.UTF8.GetBytes(requestJson));
         var outputStream = new MemoryStream();
         var rpc = new JsonRpc(inputStream, outputStream);
@@ -43,7 +47,8 @@ public class JsonRpcTests
         var outputStream = new MemoryStream();
         var rpc = new JsonRpc(inputStream, outputStream);
 
-        var responseJson = """{"ResponseCode":0,"RequestId":"test-123","ProtocolVersion":"2.0.0"}""";
+        var responseJson =
+            """{"ResponseCode":0,"RequestId":"test-123","ProtocolVersion":"2.0.0"}""";
         await rpc.WriteLineAsync(responseJson);
 
         outputStream.Position = 0;
@@ -70,8 +75,12 @@ public class JsonRpcTests
     [Fact]
     public async Task ReadLineAsync_HandlesMultipleRequests()
     {
-        var request1Json = """{"RequestType":2,"RequestId":"req-1","ProtocolVersion":"2.0.0","MinimumProtocolVersion":"2.0.0"}""" + "\n";
-        var request2Json = """{"RequestType":3,"RequestId":"req-2","ClientVersion":"6.0.0","Culture":"en-US","RequestTimeout":5000}""" + "\n";
+        var request1Json =
+            """{"RequestType":2,"RequestId":"req-1","ProtocolVersion":"2.0.0","MinimumProtocolVersion":"2.0.0"}"""
+            + "\n";
+        var request2Json =
+            """{"RequestType":3,"RequestId":"req-2","ClientVersion":"6.0.0","Culture":"en-US","RequestTimeout":5000}"""
+            + "\n";
         var combinedJson = request1Json + request2Json;
         var inputStream = new MemoryStream(Encoding.UTF8.GetBytes(combinedJson));
         var outputStream = new MemoryStream();

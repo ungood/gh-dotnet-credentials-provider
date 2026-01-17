@@ -13,7 +13,12 @@ public class InitializeHandlerTests
         var handler = new InitializeHandler();
         var requestPayload = new InitializeRequest("6.0.0", "en-US", TimeSpan.FromSeconds(5));
         var payloadJson = JObject.FromObject(requestPayload);
-        var request = new Message("init-456", MessageType.Request, MessageMethod.Initialize, payloadJson);
+        var request = new Message(
+            "init-456",
+            MessageType.Request,
+            MessageMethod.Initialize,
+            payloadJson
+        );
 
         var response = await handler.HandleAsync(request);
 

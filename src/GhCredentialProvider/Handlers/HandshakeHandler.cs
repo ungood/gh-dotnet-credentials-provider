@@ -24,12 +24,19 @@ public class HandshakeHandler : IMessageHandler
         // Check if we support the requested version
         var supported = SemanticVersion.Parse(SupportedProtocolVersion);
         var minimum = SemanticVersion.Parse(MinimumProtocolVersion);
-        
+
         if (requestedVersion >= minimum && requestedVersion <= supported)
         {
             var response = new HandshakeResponse(MessageResponseCode.Success, supported);
             var payloadJson = JObject.FromObject(response);
-            return Task.FromResult(new Message(request.RequestId, MessageType.Response, MessageMethod.Handshake, payloadJson));
+            return Task.FromResult(
+                new Message(
+                    request.RequestId,
+                    MessageType.Response,
+                    MessageMethod.Handshake,
+                    payloadJson
+                )
+            );
         }
 
         // Version negotiation failed

@@ -2,10 +2,10 @@ namespace GhCredentialProvider.GitHub;
 
 public static class GitHubHostDetector
 {
-    private static readonly string[] GitHubPackageHosts = 
+    private static readonly string[] GitHubPackageHosts =
     {
         "nuget.pkg.github.com",
-        "npm.pkg.github.com"
+        "npm.pkg.github.com",
     };
 
     public static bool IsGitHubHost(string? uri)
