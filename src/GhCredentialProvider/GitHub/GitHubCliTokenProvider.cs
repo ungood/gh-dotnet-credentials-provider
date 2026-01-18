@@ -1,4 +1,3 @@
-using System;
 using System.Diagnostics;
 using GhCredentialProvider.Logging;
 using NuGet.Common;

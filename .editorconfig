@@ -10,3 +10,8 @@ root = true
 indent_size = 4
 indent_style = space
 tab_width = 4
+
+#### .NET Code Style Rules ####
+
+# IDE0005: Remove unnecessary usings
+dotnet_diagnostic.IDE0005.severity = warning
