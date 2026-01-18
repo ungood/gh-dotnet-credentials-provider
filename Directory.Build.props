@@ -4,6 +4,18 @@
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+
+    <!-- Code quality & analysis -->
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
+		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+		<AnalysisLevel>latest</AnalysisLevel>
+		<AnalysisMode>Recommended</AnalysisMode>
+
+		<!-- See: https://github.com/dotnet/roslyn/issues/41640 -->
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Suppress warning about missing XML docs -->
+		<NoWarn>$(NoWarn);CS1591</NoWarn>
+		
   </PropertyGroup>
 </Project>

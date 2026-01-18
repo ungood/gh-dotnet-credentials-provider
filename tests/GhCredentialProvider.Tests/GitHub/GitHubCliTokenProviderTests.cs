@@ -1,5 +1,4 @@
 using GhCredentialProvider.GitHub;
-using NSubstitute;
 using Xunit;
 
 namespace GhCredentialProvider.Tests.GitHub;

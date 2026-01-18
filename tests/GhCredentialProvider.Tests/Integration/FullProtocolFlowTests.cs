@@ -1,14 +1,12 @@
 using GhCredentialProvider.GitHub;
-using GhCredentialProvider.RequestHandlers;
 using NSubstitute;
-using NuGet.Protocol.Plugins;
 using Xunit;
 
 namespace GhCredentialProvider.Tests.Integration;
 
 public class FullProtocolFlowTests
 {
-    [Fact(Skip = "Integration test - requires PluginFactory and full protocol setup")]
+    [Fact]
     public async Task FullProtocolFlow_HandshakeInitializeAndGetCredentials()
     {
         // Setup

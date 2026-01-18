@@ -1,22 +1,15 @@
-using System.Threading.Tasks;
-using GhCredentialProvider.Logging;
 using NuGet.Protocol.Plugins;
 
-namespace GhCredentialProvider.RequestHandlers
-{
-  /// <summary>
-  /// Handles a <see cref="SetLogLevelRequest"/> and replies with credentials.
-  /// </summary>
-  internal class SetLogLevelHandler : RequestHandlerBase<SetLogLevelRequest, SetLogLevelResponse>
-  {
-    public SetLogLevelHandler(ILogger logger) : base(logger)
-    {
-    }
+namespace GhCredentialProvider.RequestHandlers;
 
+/// <summary>
+///     Handles a <see cref="SetLogLevelRequest" /> and replies with credentials.
+/// </summary>
+internal class SetLogLevelHandler : BaseRequestHandler<SetLogLevelRequest, SetLogLevelResponse>
+{
     public override Task<SetLogLevelResponse> HandleRequestAsync(SetLogLevelRequest request)
     {
-      Logger.SetLogLevel(request.LogLevel);
-      return Task.FromResult(new SetLogLevelResponse(MessageResponseCode.Success));
+        Logger.SetLogLevel(request.LogLevel);
+        return Task.FromResult(new SetLogLevelResponse(MessageResponseCode.Success));
     }
-  }
 }

@@ -1,25 +1,15 @@
 # Agent Guidelines: NuGet.Protocol.Plugins
 
-**CRITICAL: Do not duplicate code that already exists in `NuGet.Protocol.Plugins`.**
-
-## Repository Reference
-
-- **[NuGet.Client Repository](https://github.com/NuGet/NuGet.Client)** - Contains the `NuGet.Protocol.Plugins` source code. Use this repository to understand available classes, interfaces, and implementation patterns.
-
 ## Implementation Guidance
 
-Refer to the [NuGet.Client repository](https://github.com/NuGet/NuGet.Client) to understand which classes and interfaces are available in `NuGet.Protocol.Plugins`. Use the repository's source code and examples to determine the appropriate classes and patterns for your implementation needs.
+- Refer to the "NuGet.Client repository" to understand which classes and interfaces are available in
+  `NuGet.Protocol.Plugins`. **CRITICAL: Do not duplicate code that already exists in `NuGet.Protocol.Plugins`.**
+- Refer to the "TeamCity Credential Provider" as a simple reference implementation.
 
-## What Framework Handles Automatically
-
-- Handshake negotiation (DO NOT register Handshake handler)
-- JSON serialization/deserialization
-- stdin/stdout I/O and connection lifecycle
-- Message routing and timeout management
-
-## What You Must Implement
-
-Implement `IRequestHandler` for: `Initialize`, `GetOperationClaims`, `GetAuthenticationCredentials`, `SetLogLevel`.
+## Workflow
+- Use `mise build` in between changes to ensure they still build.
+- Use `mise test` to run unit tests. Whenever reasonable, write failing tests before adding new features.
+- Use `mise integ-test` after a large set of changes, before asking the user to review.
 
 ## References
 
