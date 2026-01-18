@@ -8,7 +8,7 @@ namespace GhCredentialProvider.RequestHandlers
     /// Handles an <see cref="InitializeRequest"/>.
     /// </summary>
     internal class InitializeRequestHandler
-        : RequestHandlerBase<InitializeRequest, InitializeResponse>
+        : BaseRequestHandler<InitializeRequest, InitializeResponse>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="InitializeRequestHandler"/> class.

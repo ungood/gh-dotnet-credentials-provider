@@ -8,12 +8,12 @@ using NuGet.Protocol.Plugins;
 
 namespace GhCredentialProvider.RequestHandlers
 {
-    internal abstract class RequestHandlerBase<TRequest, TResponse> : IRequestHandler
+    internal abstract class BaseRequestHandler<TRequest, TResponse> : IRequestHandler
         where TResponse : class
     {
         private readonly JsonSerializerSettings _serializerSettings;
 
-        protected RequestHandlerBase()
+        protected BaseRequestHandler()
         {
             Logger = new StandardErrorLogger(GetType().Name);
             _serializerSettings = new JsonSerializerSettings { Formatting = Formatting.None };

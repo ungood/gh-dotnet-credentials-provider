@@ -12,7 +12,7 @@ namespace GhCredentialProvider.RequestHandlers
     /// Handles a <see cref="GetOperationClaimsRequest"/> and replies with the supported operations.
     /// </summary>
     internal class GetOperationClaimsRequestHandler
-        : RequestHandlerBase<GetOperationClaimsRequest, GetOperationClaimsResponse>
+        : BaseRequestHandler<GetOperationClaimsRequest, GetOperationClaimsResponse>
     {
         private readonly bool mySupportAuthentication;
 

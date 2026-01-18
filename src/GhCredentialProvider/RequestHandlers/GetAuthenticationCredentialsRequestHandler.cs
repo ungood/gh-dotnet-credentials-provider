@@ -11,7 +11,7 @@ namespace GhCredentialProvider.RequestHandlers
     /// Handles a <see cref="GetAuthenticationCredentialsRequest"/> and replies with credentials.
     /// </summary>
     internal class GetAuthenticationCredentialsRequestHandler
-        : RequestHandlerBase<
+        : BaseRequestHandler<
             GetAuthenticationCredentialsRequest,
             GetAuthenticationCredentialsResponse
         >

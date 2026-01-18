@@ -6,7 +6,7 @@ namespace GhCredentialProvider.RequestHandlers
     /// <summary>
     /// Handles a <see cref="SetLogLevelRequest"/> and replies with credentials.
     /// </summary>
-    internal class SetLogLevelHandler : RequestHandlerBase<SetLogLevelRequest, SetLogLevelResponse>
+    internal class SetLogLevelHandler : BaseRequestHandler<SetLogLevelRequest, SetLogLevelResponse>
     {
         public SetLogLevelHandler() { }
 

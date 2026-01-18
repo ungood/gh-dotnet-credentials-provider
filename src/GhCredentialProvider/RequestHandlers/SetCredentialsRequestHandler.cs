@@ -7,7 +7,7 @@ namespace GhCredentialProvider.RequestHandlers
     /// Handles a <see cref="SetCredentialsRequest"/>
     /// </summary>
     internal class SetCredentialsRequestHandler
-        : RequestHandlerBase<SetCredentialsRequest, SetCredentialsResponse>
+        : BaseRequestHandler<SetCredentialsRequest, SetCredentialsResponse>
     {
         private static readonly SetCredentialsResponse SuccessResponse = new SetCredentialsResponse(
             MessageResponseCode.Success
