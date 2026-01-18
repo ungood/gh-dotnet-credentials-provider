@@ -27,13 +27,15 @@ public class GitHubCliTokenProvider : ITokenProvider
 
         if (!string.IsNullOrWhiteSpace(envToken))
         {
-            _logger.Log(LogLevel.Information,
+            _logger.Log(
+                LogLevel.Information,
                 $"Token retrieved from environment variable for hostname: {hostname}"
             );
             return envToken.Trim();
         }
 
-        _logger.Log(LogLevel.Debug,
+        _logger.Log(
+            LogLevel.Debug,
             $"No token found in environment variables, attempting to retrieve from gh CLI"
         );
 
@@ -58,12 +60,16 @@ public class GitHubCliTokenProvider : ITokenProvider
 
             if (process.ExitCode == 0 && !string.IsNullOrWhiteSpace(output))
             {
-                _logger.Log(LogLevel.Information, $"Token retrieved from gh CLI for hostname: {hostname}");
+                _logger.Log(
+                    LogLevel.Information,
+                    $"Token retrieved from gh CLI for hostname: {hostname}"
+                );
                 return output.Trim();
             }
             else
             {
-                _logger.Log(LogLevel.Warning,
+                _logger.Log(
+                    LogLevel.Warning,
                     $"gh CLI command failed with exit code {process.ExitCode} for hostname: {hostname}"
                 );
             }
@@ -71,7 +77,8 @@ public class GitHubCliTokenProvider : ITokenProvider
         catch (Exception ex)
         {
             // gh CLI not available or failed
-            _logger.Log(LogLevel.Warning,
+            _logger.Log(
+                LogLevel.Warning,
                 $"Failed to retrieve token from gh CLI for hostname {hostname}: {ex.Message}"
             );
         }

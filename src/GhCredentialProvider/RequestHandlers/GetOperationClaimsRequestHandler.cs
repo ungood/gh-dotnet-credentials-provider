@@ -8,47 +8,68 @@ using NuGet.Versioning;
 
 namespace GhCredentialProvider.RequestHandlers
 {
-  /// <summary>
-  /// Handles a <see cref="GetOperationClaimsRequest"/> and replies with the supported operations.
-  /// </summary>
-  internal class GetOperationClaimsRequestHandler : RequestHandlerBase<GetOperationClaimsRequest, GetOperationClaimsResponse>
-  {
-    private readonly bool mySupportAuthentication;
-
     /// <summary>
-    /// Initializes a new instance of the <see cref="GetOperationClaimsRequestHandler"/> class.
+    /// Handles a <see cref="GetOperationClaimsRequest"/> and replies with the supported operations.
     /// </summary>
-    /// <param name="sdkInfo">Sdk info provider.</param>
-    public GetOperationClaimsRequestHandler(SdkInfo sdkInfo)
+    internal class GetOperationClaimsRequestHandler
+        : RequestHandlerBase<GetOperationClaimsRequest, GetOperationClaimsResponse>
     {
-      var hasVersion = sdkInfo.TryGetSdkVersion(out var semanticVersion);
-      Logger.Log(LogLevel.Verbose, hasVersion ? $".NET SDK {semanticVersion} was detected." : ".NET SDK was not detected.");
+        private readonly bool mySupportAuthentication;
 
-      mySupportAuthentication = !hasVersion || semanticVersion >= new SemanticVersion(2, 1, 400);
-      Logger.Log(LogLevel.Verbose, mySupportAuthentication ? "Authentication is supported." : "Authentication not is supported.");
-    }
-
-    public override Task<GetOperationClaimsResponse> HandleRequestAsync(GetOperationClaimsRequest request)
-    {
-      var operationClaims = new List<OperationClaim>();
-      try
-      {
-        if (mySupportAuthentication)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GetOperationClaimsRequestHandler"/> class.
+        /// </summary>
+        /// <param name="sdkInfo">Sdk info provider.</param>
+        public GetOperationClaimsRequestHandler(SdkInfo sdkInfo)
         {
-          if ((request.PackageSourceRepository == null && request.ServiceIndex == null) ||
-              (Uri.TryCreate(request.PackageSourceRepository, UriKind.Absolute, out Uri uri) &&
-              GitHubHostDetector.IsGitHubHost(uri.ToString())))
-          {
-            operationClaims.Add(OperationClaim.Authentication);            
-          }
-        }
-      }
-      catch (Exception e)
-      {
-        Logger.Log(LogLevel.Error, $"Failed to execute credentials provider: {e}");
-      }
+            var hasVersion = sdkInfo.TryGetSdkVersion(out var semanticVersion);
+            Logger.Log(
+                LogLevel.Verbose,
+                hasVersion
+                    ? $".NET SDK {semanticVersion} was detected."
+                    : ".NET SDK was not detected."
+            );
 
-      return Task.FromResult(new GetOperationClaimsResponse(operationClaims));
+            mySupportAuthentication =
+                !hasVersion || semanticVersion >= new SemanticVersion(2, 1, 400);
+            Logger.Log(
+                LogLevel.Verbose,
+                mySupportAuthentication
+                    ? "Authentication is supported."
+                    : "Authentication not is supported."
+            );
+        }
+
+        public override Task<GetOperationClaimsResponse> HandleRequestAsync(
+            GetOperationClaimsRequest request
+        )
+        {
+            var operationClaims = new List<OperationClaim>();
+            try
+            {
+                if (mySupportAuthentication)
+                {
+                    if (
+                        (request.PackageSourceRepository == null && request.ServiceIndex == null)
+                        || (
+                            Uri.TryCreate(
+                                request.PackageSourceRepository,
+                                UriKind.Absolute,
+                                out Uri uri
+                            ) && GitHubHostDetector.IsGitHubHost(uri.ToString())
+                        )
+                    )
+                    {
+                        operationClaims.Add(OperationClaim.Authentication);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Log(LogLevel.Error, $"Failed to execute credentials provider: {e}");
+            }
+
+            return Task.FromResult(new GetOperationClaimsResponse(operationClaims));
+        }
     }
-  }
 }

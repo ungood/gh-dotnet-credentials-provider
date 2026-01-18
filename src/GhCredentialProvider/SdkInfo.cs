@@ -4,34 +4,34 @@ using NuGet.Versioning;
 
 namespace GhCredentialProvider
 {
-  internal class SdkInfo
-  {
-    public bool TryGetSdkVersion(out SemanticVersion version)
+    internal class SdkInfo
     {
-      try
-      {
-        var sdkPath = Environment.GetEnvironmentVariable("MSBuildSDKsPath");
-        if (sdkPath != null)
+        public bool TryGetSdkVersion(out SemanticVersion version)
         {
-          var versionFile = Path.Combine(sdkPath, "..", ".version");
-          if (File.Exists(versionFile))
-          {
-            var lines = File.ReadAllLines(versionFile);
-            if (lines.Length > 1)
+            try
             {
-              version = SemanticVersion.Parse(lines[1]);
-              return true;
+                var sdkPath = Environment.GetEnvironmentVariable("MSBuildSDKsPath");
+                if (sdkPath != null)
+                {
+                    var versionFile = Path.Combine(sdkPath, "..", ".version");
+                    if (File.Exists(versionFile))
+                    {
+                        var lines = File.ReadAllLines(versionFile);
+                        if (lines.Length > 1)
+                        {
+                            version = SemanticVersion.Parse(lines[1]);
+                            return true;
+                        }
+                    }
+                }
             }
-          }
-        }
-      }
-      catch
-      {
-        // ignored
-      }
+            catch
+            {
+                // ignored
+            }
 
-      version = default(SemanticVersion);
-      return false;
+            version = default(SemanticVersion);
+            return false;
+        }
     }
-  }
 }

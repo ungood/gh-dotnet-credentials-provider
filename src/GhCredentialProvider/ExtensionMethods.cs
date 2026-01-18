@@ -4,7 +4,7 @@ using System.Text;
 
 namespace GhCredentialProvider
 {
-  /// <summary>
+    /// <summary>
     /// Represents the set of extension methods used by this project.
     /// </summary>
     internal static class ExtensionMethods
@@ -36,9 +36,7 @@ namespace GhCredentialProvider
         /// <returns>A <see cref="Uri"/> with only the host.</returns>
         public static Uri ToHostOnly(this Uri uri)
         {
-            return uri.Segments.Length > 1
-                ? new Uri($"{uri.Scheme}://{uri.Host}")
-                : uri;
+            return uri.Segments.Length > 1 ? new Uri($"{uri.Scheme}://{uri.Host}") : uri;
         }
 
         /// <summary>
