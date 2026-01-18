@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using GhCredentialProvider.GitHub;
 using GhCredentialProvider.Logging;
 using GhCredentialProvider.RequestHandlers;
@@ -11,7 +10,15 @@ internal static class Program
 {
     public static int Main(string[] args)
     {
-        DebugBreakIfPluginDebuggingIsEnabled();
+        if (
+            !string.Equals(args.SingleOrDefault(), "-plugin", StringComparison.OrdinalIgnoreCase)
+        )
+        {
+            Console.Error.WriteLine(
+                "Error: This credential provider only supports plugin mode. Expected argument: -plugin"
+            );
+            return 1;
+        }
 
         var tokenSource = new CancellationTokenSource();
         var logger = new StandardErrorLogger("GhCredentialProvider");
@@ -26,7 +33,7 @@ internal static class Program
 
         try
         {
-            return MainInternal(tokenSource, args).GetAwaiter().GetResult();
+            return MainInternal(tokenSource).GetAwaiter().GetResult();
         }
         catch (OperationCanceledException e)
         {
@@ -39,10 +46,7 @@ internal static class Program
         }
     }
 
-    private static async Task<int> MainInternal(
-        CancellationTokenSource tokenSource,
-        string[] args
-    )
+    private static async Task<int> MainInternal(CancellationTokenSource tokenSource)
     {
         var logger = new StandardErrorLogger("GhCredentialProvider");
         var tokenProvider = new GitHubCliTokenProvider();
@@ -50,85 +54,24 @@ internal static class Program
         var requestHandlers = new NuGet.Protocol.Plugins.RequestHandlers();
         requestHandlers.TryAdd(
             MessageMethod.GetAuthenticationCredentials,
-            new GetAuthenticationCredentialsRequestHandler(tokenProvider)
+            new GetAuthenticationCredentialsHandler(tokenProvider)
         );
-        requestHandlers.TryAdd(
-            MessageMethod.GetOperationClaims,
-            new GetOperationClaimsRequestHandler(sdkInfo)
-        );
+        requestHandlers.TryAdd(MessageMethod.GetOperationClaims, new GetOperationClaimsHandler(sdkInfo));
         requestHandlers.TryAdd(MessageMethod.SetLogLevel, new SetLogLevelHandler());
-        requestHandlers.TryAdd(MessageMethod.Initialize, new InitializeRequestHandler());
-        requestHandlers.TryAdd(
-            MessageMethod.SetCredentials,
-            new SetCredentialsRequestHandler()
-        );
+        requestHandlers.TryAdd(MessageMethod.Initialize, new InitializeHandler());
 
-        if (
-            string.Equals(args.SingleOrDefault(), "-plugin", StringComparison.OrdinalIgnoreCase)
-        )
-        {
-            logger.Log(LogLevel.Verbose, "Running in plug-in mode");
+        logger.Log(LogLevel.Verbose, "Running in plug-in mode");
 
-            try
-            {
-                using var plugin = await PluginFactory
-                    .CreateFromCurrentProcessAsync(
-                        requestHandlers,
-                        ConnectionOptions.CreateDefault(),
-                        CancellationToken.None
-                    )
-                    .ConfigureAwait(false);
-                await RunNuGetPluginsAsync(plugin, tokenSource.Token)
-                    .ConfigureAwait(false);
-            }
-            catch (OperationCanceledException e)
-            {
-                // Multiple source restoration. Request will be cancelled if a package has been successfully restored from another source
-                logger.Log(
-                    LogLevel.Verbose,
-                    $"Request to credential provider was cancelled. Message: {e.Message}"
-                );
-            }
-
-            return 0;
-        }
-
-        if (
-            requestHandlers.TryGet(
-                MessageMethod.GetAuthenticationCredentials,
-                out var requestHandler
+        using var plugin = await PluginFactory
+            .CreateFromCurrentProcessAsync(
+                requestHandlers,
+                ConnectionOptions.CreateDefault(),
+                CancellationToken.None
             )
-            && requestHandler
-                is GetAuthenticationCredentialsRequestHandler getAuthenticationCredentialsRequestHandler
-        )
-        {
-            logger.Log(LogLevel.Verbose, "Running in stand-alone mode");
+            .ConfigureAwait(false);
+        await RunNuGetPluginsAsync(plugin, tokenSource.Token).ConfigureAwait(false);
 
-            if (args.Length == 0)
-            {
-                Console.WriteLine("Usage: gh-dotnet-credential-provider <NuGetFeedUrl>");
-                return 1;
-            }
-
-            var request = new GetAuthenticationCredentialsRequest(
-                new Uri(args[0]),
-                false,
-                true,
-                false
-            );
-            var response = getAuthenticationCredentialsRequestHandler
-                .HandleRequestAsync(request)
-                .GetAwaiter()
-                .GetResult();
-
-            Console.WriteLine(response?.Username);
-            Console.WriteLine(response?.Password);
-            Console.WriteLine(response?.Password?.ToJsonWebTokenString());
-
-            return 0;
-        }
-
-        return -1;
+        return 0;
     }
 
     private static async Task RunNuGetPluginsAsync(
@@ -155,12 +98,5 @@ internal static class Program
             .ConfigureAwait(false);
 
         if (!complete) logger.Log(LogLevel.Error, "Timed out waiting for plug-in operations to complete");
-    }
-
-    private static void DebugBreakIfPluginDebuggingIsEnabled()
-    {
-        if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("NUGET_PLUGIN_DEBUG")))
-            while (!Debugger.IsAttached)
-                Thread.Sleep(100);
     }
 }

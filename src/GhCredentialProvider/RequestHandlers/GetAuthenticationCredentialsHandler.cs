@@ -8,10 +8,10 @@ namespace GhCredentialProvider.RequestHandlers;
 ///     Handles a <see cref="GetAuthenticationCredentialsRequest" /> and replies with credentials.
 /// </summary>
 /// <remarks>
-///     Initializes a new instance of the <see cref="GetAuthenticationCredentialsRequestHandler" /> class.
+///     Initializes a new instance of the <see cref="GetAuthenticationCredentialsHandler" /> class.
 /// </remarks>
 /// <param name="tokenProvider">An <see cref="ITokenProvider" /> to use for retrieving tokens.</param>
-internal class GetAuthenticationCredentialsRequestHandler(ITokenProvider tokenProvider)
+internal class GetAuthenticationCredentialsHandler(ITokenProvider tokenProvider)
     : BaseRequestHandler<
         GetAuthenticationCredentialsRequest,
         GetAuthenticationCredentialsResponse

@@ -16,7 +16,7 @@ public class GetAuthenticationCredentialsHandlerTests
             .GetTokenAsync("github.com", Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<string?>("ghp_testtoken123"));
 
-        var handler = new GetAuthenticationCredentialsRequestHandler(tokenProvider);
+        var handler = new GetAuthenticationCredentialsHandler(tokenProvider);
         var request = new GetAuthenticationCredentialsRequest(
             new Uri("https://nuget.pkg.github.com/owner/index.json"),
             false,
@@ -43,7 +43,7 @@ public class GetAuthenticationCredentialsHandlerTests
             .GetTokenAsync("github.com", Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<string?>(null));
 
-        var handler = new GetAuthenticationCredentialsRequestHandler(tokenProvider);
+        var handler = new GetAuthenticationCredentialsHandler(tokenProvider);
         var request = new GetAuthenticationCredentialsRequest(
             new Uri("https://nuget.pkg.github.com/owner/index.json"),
             false,
@@ -68,7 +68,7 @@ public class GetAuthenticationCredentialsHandlerTests
             .GetTokenAsync("github.com", Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<string?>(null));
 
-        var handler = new GetAuthenticationCredentialsRequestHandler(tokenProvider);
+        var handler = new GetAuthenticationCredentialsHandler(tokenProvider);
         var request = new GetAuthenticationCredentialsRequest(
             new Uri("https://nuget.pkg.github.com/owner/index.json"),
             false,
@@ -87,7 +87,7 @@ public class GetAuthenticationCredentialsHandlerTests
     public async Task HandleRequestAsync_WithNonGitHubUri_ReturnsNotFound()
     {
         var tokenProvider = Substitute.For<ITokenProvider>();
-        var handler = new GetAuthenticationCredentialsRequestHandler(tokenProvider);
+        var handler = new GetAuthenticationCredentialsHandler(tokenProvider);
         var request = new GetAuthenticationCredentialsRequest(
             new Uri("https://api.nuget.org/v3/index.json"),
             false,
@@ -110,7 +110,7 @@ public class GetAuthenticationCredentialsHandlerTests
             .GetTokenAsync("ghe.company.com", Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<string?>("ghp_enterprise_token"));
 
-        var handler = new GetAuthenticationCredentialsRequestHandler(tokenProvider);
+        var handler = new GetAuthenticationCredentialsHandler(tokenProvider);
         var request = new GetAuthenticationCredentialsRequest(
             new Uri("https://ghe.company.com/nuget/index.json"),
             false,

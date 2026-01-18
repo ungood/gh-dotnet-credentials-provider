@@ -8,16 +8,16 @@ namespace GhCredentialProvider.RequestHandlers;
 /// <summary>
 ///     Handles a <see cref="GetOperationClaimsRequest" /> and replies with the supported operations.
 /// </summary>
-internal class GetOperationClaimsRequestHandler
+internal class GetOperationClaimsHandler
     : BaseRequestHandler<GetOperationClaimsRequest, GetOperationClaimsResponse>
 {
     private readonly bool mySupportAuthentication;
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="GetOperationClaimsRequestHandler" /> class.
+    ///     Initializes a new instance of the <see cref="GetOperationClaimsHandler" /> class.
     /// </summary>
     /// <param name="sdkInfo">Sdk info provider.</param>
-    public GetOperationClaimsRequestHandler(SdkInfo sdkInfo)
+    public GetOperationClaimsHandler(SdkInfo sdkInfo)
     {
         var hasVersion = SdkInfo.TryGetSdkVersion(out var semanticVersion);
         Logger.Log(

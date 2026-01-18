@@ -6,13 +6,13 @@ namespace GhCredentialProvider.RequestHandlers;
 /// <summary>
 ///     Handles an <see cref="InitializeRequest" />.
 /// </summary>
-internal class InitializeRequestHandler
+internal class InitializeHandler
     : BaseRequestHandler<InitializeRequest, InitializeResponse>
 {
     /// <summary>
-    ///     Initializes a new instance of the <see cref="InitializeRequestHandler" /> class.
+    ///     Initializes a new instance of the <see cref="InitializeHandler" /> class.
     /// </summary>
-    public InitializeRequestHandler()
+    public InitializeHandler()
     {
     }
 
