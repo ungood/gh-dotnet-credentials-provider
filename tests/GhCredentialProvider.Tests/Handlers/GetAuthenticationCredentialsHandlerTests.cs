@@ -2,7 +2,6 @@ using GhCredentialProvider.GitHub;
 using GhCredentialProvider.RequestHandlers;
 using NSubstitute;
 using NuGet.Protocol.Plugins;
-using ILogger = GhCredentialProvider.Logging.ILogger;
 using Xunit;
 
 namespace GhCredentialProvider.Tests.Handlers;
@@ -12,13 +11,12 @@ public class GetAuthenticationCredentialsHandlerTests
     [Fact]
     public async Task HandleRequestAsync_WithValidToken_ReturnsSuccess()
     {
-        var logger = Substitute.For<ILogger>();
         var tokenProvider = Substitute.For<ITokenProvider>();
         tokenProvider
             .GetTokenAsync("github.com", Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<string?>("ghp_testtoken123"));
 
-        var handler = new GetAuthenticationCredentialsRequestHandler(logger, tokenProvider);
+        var handler = new GetAuthenticationCredentialsRequestHandler(tokenProvider);
         var request = new GetAuthenticationCredentialsRequest(
             new Uri("https://nuget.pkg.github.com/owner/index.json"),
             isRetry: false,
@@ -40,13 +38,12 @@ public class GetAuthenticationCredentialsHandlerTests
     [Fact]
     public async Task HandleRequestAsync_WithNoTokenAndNonInteractive_ReturnsNotFound()
     {
-        var logger = Substitute.For<ILogger>();
         var tokenProvider = Substitute.For<ITokenProvider>();
         tokenProvider
             .GetTokenAsync("github.com", Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<string?>(null));
 
-        var handler = new GetAuthenticationCredentialsRequestHandler(logger, tokenProvider);
+        var handler = new GetAuthenticationCredentialsRequestHandler(tokenProvider);
         var request = new GetAuthenticationCredentialsRequest(
             new Uri("https://nuget.pkg.github.com/owner/index.json"),
             isRetry: false,
@@ -66,13 +63,12 @@ public class GetAuthenticationCredentialsHandlerTests
     [Fact]
     public async Task HandleRequestAsync_WithNoTokenAndInteractive_ReturnsNotFound()
     {
-        var logger = Substitute.For<ILogger>();
         var tokenProvider = Substitute.For<ITokenProvider>();
         tokenProvider
             .GetTokenAsync("github.com", Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<string?>(null));
 
-        var handler = new GetAuthenticationCredentialsRequestHandler(logger, tokenProvider);
+        var handler = new GetAuthenticationCredentialsRequestHandler(tokenProvider);
         var request = new GetAuthenticationCredentialsRequest(
             new Uri("https://nuget.pkg.github.com/owner/index.json"),
             isRetry: false,
@@ -90,9 +86,8 @@ public class GetAuthenticationCredentialsHandlerTests
     [Fact]
     public async Task HandleRequestAsync_WithNonGitHubUri_ReturnsNotFound()
     {
-        var logger = Substitute.For<ILogger>();
         var tokenProvider = Substitute.For<ITokenProvider>();
-        var handler = new GetAuthenticationCredentialsRequestHandler(logger, tokenProvider);
+        var handler = new GetAuthenticationCredentialsRequestHandler(tokenProvider);
         var request = new GetAuthenticationCredentialsRequest(
             new Uri("https://api.nuget.org/v3/index.json"),
             isRetry: false,
@@ -110,13 +105,12 @@ public class GetAuthenticationCredentialsHandlerTests
     [Fact]
     public async Task HandleRequestAsync_WithGitHubEnterprise_ExtractsCorrectHostname()
     {
-        var logger = Substitute.For<ILogger>();
         var tokenProvider = Substitute.For<ITokenProvider>();
         tokenProvider
             .GetTokenAsync("ghe.company.com", Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<string?>("ghp_enterprise_token"));
 
-        var handler = new GetAuthenticationCredentialsRequestHandler(logger, tokenProvider);
+        var handler = new GetAuthenticationCredentialsRequestHandler(tokenProvider);
         var request = new GetAuthenticationCredentialsRequest(
             new Uri("https://ghe.company.com/nuget/index.json"),
             isRetry: false,

@@ -1,8 +1,6 @@
 using GhCredentialProvider.RequestHandlers;
 using Newtonsoft.Json.Linq;
 using NuGet.Protocol.Plugins;
-using NSubstitute;
-using ILogger = GhCredentialProvider.Logging.ILogger;
 using Xunit;
 
 namespace GhCredentialProvider.Tests.Handlers;
@@ -12,9 +10,8 @@ public class GetOperationClaimsHandlerTests
     [Fact]
     public async Task HandleRequestAsync_WithGitHubPackageSource_ReturnsAuthenticationClaim()
     {
-        var logger = Substitute.For<ILogger>();
         var sdkInfo = new SdkInfo();
-        var handler = new GetOperationClaimsRequestHandler(logger, sdkInfo);
+        var handler = new GetOperationClaimsRequestHandler(sdkInfo);
         var request = new GetOperationClaimsRequest(
             "https://nuget.pkg.github.com/owner/index.json",
             JObject.FromObject(
@@ -32,9 +29,8 @@ public class GetOperationClaimsHandlerTests
     [Fact]
     public async Task HandleRequestAsync_WithNonGitHubPackageSource_ReturnsEmptyClaims()
     {
-        var logger = Substitute.For<ILogger>();
         var sdkInfo = new SdkInfo();
-        var handler = new GetOperationClaimsRequestHandler(logger, sdkInfo);
+        var handler = new GetOperationClaimsRequestHandler(sdkInfo);
         var request = new GetOperationClaimsRequest(
             "https://api.nuget.org/v3/index.json",
             JObject.FromObject(
@@ -51,9 +47,8 @@ public class GetOperationClaimsHandlerTests
     [Fact]
     public async Task HandleRequestAsync_WithGitHubEnterprise_ReturnsAuthenticationClaim()
     {
-        var logger = Substitute.For<ILogger>();
         var sdkInfo = new SdkInfo();
-        var handler = new GetOperationClaimsRequestHandler(logger, sdkInfo);
+        var handler = new GetOperationClaimsRequestHandler(sdkInfo);
         var request = new GetOperationClaimsRequest(
             "https://ghe.company.com/nuget/index.json",
             JObject.FromObject(
@@ -71,9 +66,8 @@ public class GetOperationClaimsHandlerTests
     [Fact]
     public async Task HandleRequestAsync_WithNullServiceIndexButGitHubPackageSource_ReturnsAuthenticationClaim()
     {
-        var logger = Substitute.For<ILogger>();
         var sdkInfo = new SdkInfo();
-        var handler = new GetOperationClaimsRequestHandler(logger, sdkInfo);
+        var handler = new GetOperationClaimsRequestHandler(sdkInfo);
         var request = new GetOperationClaimsRequest(
             "https://nuget.pkg.github.com/owner/index.json",
             null

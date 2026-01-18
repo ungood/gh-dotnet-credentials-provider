@@ -5,7 +5,6 @@ using GhCredentialProvider.GitHub;
 using NuGet.Common;
 using NuGet.Protocol.Plugins;
 using NuGet.Versioning;
-using ILogger = GhCredentialProvider.Logging.ILogger;
 
 namespace GhCredentialProvider.RequestHandlers
 {
@@ -19,15 +18,14 @@ namespace GhCredentialProvider.RequestHandlers
     /// <summary>
     /// Initializes a new instance of the <see cref="GetOperationClaimsRequestHandler"/> class.
     /// </summary>
-    /// <param name="logger">A <see cref="Logging.ILogger"/> to use for logging.</param>
     /// <param name="sdkInfo">Sdk info provider.</param>
-    public GetOperationClaimsRequestHandler(ILogger logger, SdkInfo sdkInfo) : base(logger)
+    public GetOperationClaimsRequestHandler(SdkInfo sdkInfo)
     {
       var hasVersion = sdkInfo.TryGetSdkVersion(out var semanticVersion);
-      logger.Log(LogLevel.Verbose, hasVersion ? $".NET SDK {semanticVersion} was detected." : ".NET SDK was not detected.");
+      Logger.Log(LogLevel.Verbose, hasVersion ? $".NET SDK {semanticVersion} was detected." : ".NET SDK was not detected.");
 
       mySupportAuthentication = !hasVersion || semanticVersion >= new SemanticVersion(2, 1, 400);
-      logger.Log(LogLevel.Verbose, mySupportAuthentication ? "Authentication is supported." : "Authentication not is supported.");
+      Logger.Log(LogLevel.Verbose, mySupportAuthentication ? "Authentication is supported." : "Authentication not is supported.");
     }
 
     public override Task<GetOperationClaimsResponse> HandleRequestAsync(GetOperationClaimsRequest request)

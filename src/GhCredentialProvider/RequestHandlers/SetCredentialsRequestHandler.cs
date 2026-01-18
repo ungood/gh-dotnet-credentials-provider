@@ -1,5 +1,4 @@
 using System.Threading.Tasks;
-using GhCredentialProvider.Logging;
 using NuGet.Protocol.Plugins;
 
 namespace GhCredentialProvider.RequestHandlers
@@ -12,7 +11,7 @@ namespace GhCredentialProvider.RequestHandlers
     private static readonly SetCredentialsResponse SuccessResponse =
       new SetCredentialsResponse(MessageResponseCode.Success);
 
-    public SetCredentialsRequestHandler(ILogger logger) : base(logger)
+    public SetCredentialsRequestHandler()
     {
     }
 

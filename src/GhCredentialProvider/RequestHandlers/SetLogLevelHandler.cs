@@ -1,5 +1,4 @@
 using System.Threading.Tasks;
-using GhCredentialProvider.Logging;
 using NuGet.Protocol.Plugins;
 
 namespace GhCredentialProvider.RequestHandlers
@@ -9,7 +8,7 @@ namespace GhCredentialProvider.RequestHandlers
   /// </summary>
   internal class SetLogLevelHandler : RequestHandlerBase<SetLogLevelRequest, SetLogLevelResponse>
   {
-    public SetLogLevelHandler(ILogger logger) : base(logger)
+    public SetLogLevelHandler()
     {
     }
 

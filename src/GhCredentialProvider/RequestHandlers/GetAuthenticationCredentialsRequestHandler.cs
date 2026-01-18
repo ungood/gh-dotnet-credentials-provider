@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using GhCredentialProvider.GitHub;
 using NuGet.Common;
 using NuGet.Protocol.Plugins;
-using ILogger = GhCredentialProvider.Logging.ILogger;
 
 namespace GhCredentialProvider.RequestHandlers
 {
@@ -21,10 +20,8 @@ namespace GhCredentialProvider.RequestHandlers
     /// <summary>
     /// Initializes a new instance of the <see cref="GetAuthenticationCredentialsRequestHandler"/> class.
     /// </summary>
-    /// <param name="logger">A <see cref="ILogger"/> to use for logging.</param>
     /// <param name="tokenProvider">An <see cref="ITokenProvider"/> to use for retrieving tokens.</param>
-    public GetAuthenticationCredentialsRequestHandler(ILogger logger, ITokenProvider tokenProvider)
-      : base(logger)
+    public GetAuthenticationCredentialsRequestHandler(ITokenProvider tokenProvider)
     {
       _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
     }

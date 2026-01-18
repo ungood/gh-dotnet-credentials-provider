@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,7 +8,6 @@ using GhCredentialProvider.Logging;
 using GhCredentialProvider.RequestHandlers;
 using NuGet.Common;
 using NuGet.Protocol.Plugins;
-using ILogger = GhCredentialProvider.Logging.ILogger;
 
 namespace GhCredentialProvider
 {
@@ -20,15 +18,9 @@ namespace GhCredentialProvider
       DebugBreakIfPluginDebuggingIsEnabled();
 
       var tokenSource = new CancellationTokenSource();
-      var multiLogger = new MultiLogger();
+      var logger = new StandardErrorLogger("GhCredentialProvider");
 
-      var fileLogger = GetFileLogger();
-      if (fileLogger != null)
-      {
-        multiLogger.Add(fileLogger);
-      }
-
-      multiLogger.Log(LogLevel.Verbose, "Entered nuget credentials plugin");
+      logger.Log(LogLevel.Verbose, "Entered nuget credentials plugin");
 
       Console.CancelKeyPress += (sender, eventArgs) =>
                                 {
@@ -38,47 +30,48 @@ namespace GhCredentialProvider
 
       try
       {
-        return MainInternal(tokenSource, multiLogger, args).GetAwaiter().GetResult();
+        return MainInternal(tokenSource, args).GetAwaiter().GetResult();
       }
       catch (OperationCanceledException e)
       {
         // Multiple source restoration. Request will be cancelled if a package has been successfully restored from another source
-        multiLogger.Log(LogLevel.Verbose, $"Request to credential provider was cancelled. Message: {e.Message}");
+        logger.Log(LogLevel.Verbose, $"Request to credential provider was cancelled. Message: {e.Message}");
         return 0;
       }
     }
 
-    private static async Task<int> MainInternal(CancellationTokenSource tokenSource, MultiLogger multiLogger, string[] args)
+    private static async Task<int> MainInternal(CancellationTokenSource tokenSource, string[] args)
     {
+      var logger = new StandardErrorLogger("GhCredentialProvider");
       var tokenProvider = new GitHubCliTokenProvider();
       var sdkInfo = new SdkInfo();
       var requestHandlers = new RequestHandlerCollection
                             {
                               {
                                 MessageMethod.GetAuthenticationCredentials,
-                                new GetAuthenticationCredentialsRequestHandler(multiLogger, tokenProvider)
+                                new GetAuthenticationCredentialsRequestHandler(tokenProvider)
                               },
                               {
                                 MessageMethod.GetOperationClaims,
-                                new GetOperationClaimsRequestHandler(multiLogger, sdkInfo)
+                                new GetOperationClaimsRequestHandler(sdkInfo)
                               },
                               {
                                 MessageMethod.SetLogLevel,
-                                new SetLogLevelHandler(multiLogger)
+                                new SetLogLevelHandler()
                               },
                               {
                                 MessageMethod.Initialize,
-                                new InitializeRequestHandler(multiLogger)
+                                new InitializeRequestHandler()
                               },
                               {
                                 MessageMethod.SetCredentials,
-                                new SetCredentialsRequestHandler(multiLogger)
+                                new SetCredentialsRequestHandler()
                               }
                             };
 
       if (String.Equals(args.SingleOrDefault(), "-plugin", StringComparison.OrdinalIgnoreCase))
       {
-        multiLogger.Log(LogLevel.Verbose, "Running in plug-in mode");
+        logger.Log(LogLevel.Verbose, "Running in plug-in mode");
 
         try
         {
@@ -86,14 +79,13 @@ namespace GhCredentialProvider
             .CreateFromCurrentProcessAsync(requestHandlers, ConnectionOptions.CreateDefault(), CancellationToken.None)
             .ConfigureAwait(continueOnCapturedContext: false))
           {
-            multiLogger.Add(new PluginConnectionLogger(plugin.Connection));
-            await RunNuGetPluginsAsync(plugin, multiLogger, tokenSource.Token).ConfigureAwait(continueOnCapturedContext: false);
+            await RunNuGetPluginsAsync(plugin, tokenSource.Token).ConfigureAwait(continueOnCapturedContext: false);
           }
         }
         catch (OperationCanceledException e)
         {
           // Multiple source restoration. Request will be cancelled if a package has been successfully restored from another source
-          multiLogger.Log(LogLevel.Verbose, $"Request to credential provider was cancelled. Message: {e.Message}");
+          logger.Log(LogLevel.Verbose, $"Request to credential provider was cancelled. Message: {e.Message}");
         }
 
         return 0;
@@ -102,7 +94,7 @@ namespace GhCredentialProvider
       if (requestHandlers.TryGet(MessageMethod.GetAuthenticationCredentials, out IRequestHandler requestHandler) &&
           requestHandler is GetAuthenticationCredentialsRequestHandler getAuthenticationCredentialsRequestHandler)
       {
-        multiLogger.Log(LogLevel.Verbose, "Running in stand-alone mode");
+        logger.Log(LogLevel.Verbose, "Running in stand-alone mode");
 
         if (args.Length == 0)
         {
@@ -128,8 +120,9 @@ namespace GhCredentialProvider
       return -1;
     }
 
-    private static async Task RunNuGetPluginsAsync(IPlugin plugin, ILogger logger, CancellationToken cancellationToken)
+    private static async Task RunNuGetPluginsAsync(IPlugin plugin, CancellationToken cancellationToken)
     {
+      var logger = new StandardErrorLogger("GhCredentialProvider");
       SemaphoreSlim semaphore = new SemaphoreSlim(0);
 
       plugin.Connection.Faulted += (sender, a) =>
@@ -158,25 +151,6 @@ namespace GhCredentialProvider
           Thread.Sleep(100);
         }
       }
-    }
-    
-    private static FileLogger? GetFileLogger()
-    {
-      var location = Environment.GetEnvironmentVariable("NUGET_PLUGIN_LOG_PATH");
-      if (string.IsNullOrEmpty(location))
-      {
-        return null;
-      }
-
-      var directoryName = Path.GetDirectoryName(location);
-      if (!string.IsNullOrEmpty(directoryName))
-      {
-        Directory.CreateDirectory(directoryName);
-      }
-      var fileLogger = new FileLogger(location);
-      fileLogger.SetLogLevel(LogLevel.Verbose);
-
-      return fileLogger;
     }
   }
 }

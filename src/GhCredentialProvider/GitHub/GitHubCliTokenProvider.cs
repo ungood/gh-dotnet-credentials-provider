@@ -1,13 +1,12 @@
 using System.Diagnostics;
 using GhCredentialProvider.Logging;
 using NuGet.Common;
-using ILogger = GhCredentialProvider.Logging.ILogger;
 
 namespace GhCredentialProvider.GitHub;
 
 public class GitHubCliTokenProvider : ITokenProvider
 {
-    private readonly ILogger _logger;
+    private readonly StandardErrorLogger _logger;
 
     public GitHubCliTokenProvider()
     {

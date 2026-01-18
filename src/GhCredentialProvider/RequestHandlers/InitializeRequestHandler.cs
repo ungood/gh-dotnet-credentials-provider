@@ -1,7 +1,6 @@
 using System.Threading.Tasks;
 using NuGet.Common;
 using NuGet.Protocol.Plugins;
-using ILogger = GhCredentialProvider.Logging.ILogger;
 
 namespace GhCredentialProvider.RequestHandlers
 {
@@ -13,9 +12,7 @@ namespace GhCredentialProvider.RequestHandlers
     /// <summary>
     /// Initializes a new instance of the <see cref="InitializeRequestHandler"/> class.
     /// </summary>
-    /// <param name="logger">A <see cref="Logging.ILogger"/> to use for logging.</param>
-    public InitializeRequestHandler(ILogger logger)
-      : base(logger)
+    public InitializeRequestHandler()
     {
     }
 

@@ -1,10 +1,10 @@
 using System.Threading;
 using System.Threading.Tasks;
+using GhCredentialProvider.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using NuGet.Common;
 using NuGet.Protocol.Plugins;
-using ILogger = GhCredentialProvider.Logging.ILogger;
 
 namespace GhCredentialProvider.RequestHandlers
 {
@@ -12,17 +12,17 @@ namespace GhCredentialProvider.RequestHandlers
   {
     private readonly JsonSerializerSettings _serializerSettings;
 
-    protected RequestHandlerBase(ILogger logger)
+    protected RequestHandlerBase()
     {
-      Logger = logger;
+      Logger = new StandardErrorLogger(GetType().Name);
       _serializerSettings = new JsonSerializerSettings {Formatting = Formatting.None};
       _serializerSettings.Converters.Add(new StringEnumConverter());
     }
     
     /// <summary>
-    /// Gets the current <see cref="ILogger"/> to use for logging.
+    /// Gets the current logger to use for logging.
     /// </summary>
-    protected ILogger Logger { get; }
+    protected StandardErrorLogger Logger { get; }
 
     /// <summary>
     /// Gets a <see cref="CancellationToken"/> to use.
