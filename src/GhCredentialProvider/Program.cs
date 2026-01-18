@@ -51,17 +51,16 @@ namespace GhCredentialProvider
     private static async Task<int> MainInternal(CancellationTokenSource tokenSource, MultiLogger multiLogger, string[] args)
     {
       var tokenProvider = new GitHubCliTokenProvider();
-      var credentialProvider = new GhCredentialProvider(multiLogger, tokenProvider);
       var sdkInfo = new SdkInfo();
       var requestHandlers = new RequestHandlerCollection
                             {
                               {
                                 MessageMethod.GetAuthenticationCredentials,
-                                new GetAuthenticationCredentialsRequestHandler(multiLogger, credentialProvider)
+                                new GetAuthenticationCredentialsRequestHandler(multiLogger, tokenProvider)
                               },
                               {
                                 MessageMethod.GetOperationClaims,
-                                new GetOperationClaimsRequestHandler(multiLogger, credentialProvider, sdkInfo)
+                                new GetOperationClaimsRequestHandler(multiLogger, sdkInfo)
                               },
                               {
                                 MessageMethod.SetLogLevel,

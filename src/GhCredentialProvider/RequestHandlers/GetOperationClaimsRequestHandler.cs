@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using GhCredentialProvider.GitHub;
 using NuGet.Common;
 using NuGet.Protocol.Plugins;
 using NuGet.Versioning;
@@ -13,18 +14,15 @@ namespace GhCredentialProvider.RequestHandlers
   /// </summary>
   internal class GetOperationClaimsRequestHandler : RequestHandlerBase<GetOperationClaimsRequest, GetOperationClaimsResponse>
   {
-    private readonly ICredentialProvider myCredentialProvider;
     private readonly bool mySupportAuthentication;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GetOperationClaimsRequestHandler"/> class.
     /// </summary>
     /// <param name="logger">A <see cref="Logging.ILogger"/> to use for logging.</param>
-    /// <param name="credentialProvider">An <see cref="ICredentialProvider"/> containing credential provider.</param>
     /// <param name="sdkInfo">Sdk info provider.</param>
-    public GetOperationClaimsRequestHandler(ILogger logger, ICredentialProvider credentialProvider, SdkInfo sdkInfo) : base(logger)
+    public GetOperationClaimsRequestHandler(ILogger logger, SdkInfo sdkInfo) : base(logger)
     {
-      myCredentialProvider = credentialProvider;
       var hasVersion = sdkInfo.TryGetSdkVersion(out var semanticVersion);
       logger.Log(LogLevel.Verbose, hasVersion ? $".NET SDK {semanticVersion} was detected." : ".NET SDK was not detected.");
 
@@ -41,7 +39,7 @@ namespace GhCredentialProvider.RequestHandlers
         {
           if ((request.PackageSourceRepository == null && request.ServiceIndex == null) ||
               (Uri.TryCreate(request.PackageSourceRepository, UriKind.Absolute, out Uri uri) &&
-              myCredentialProvider.CanProvideCredentials(uri)))
+              GitHubHostDetector.IsGitHubHost(uri.ToString())))
           {
             operationClaims.Add(OperationClaim.Authentication);            
           }
