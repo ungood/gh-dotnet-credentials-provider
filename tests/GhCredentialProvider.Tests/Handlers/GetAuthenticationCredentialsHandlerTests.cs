@@ -19,9 +19,9 @@ public class GetAuthenticationCredentialsHandlerTests
         var handler = new GetAuthenticationCredentialsRequestHandler(tokenProvider);
         var request = new GetAuthenticationCredentialsRequest(
             new Uri("https://nuget.pkg.github.com/owner/index.json"),
-            isRetry: false,
-            isNonInteractive: true,
-            canShowDialog: false
+            false,
+            true,
+            false
         );
 
         var response = await handler.HandleRequestAsync(request);
@@ -46,9 +46,9 @@ public class GetAuthenticationCredentialsHandlerTests
         var handler = new GetAuthenticationCredentialsRequestHandler(tokenProvider);
         var request = new GetAuthenticationCredentialsRequest(
             new Uri("https://nuget.pkg.github.com/owner/index.json"),
-            isRetry: false,
-            isNonInteractive: true,
-            canShowDialog: false
+            false,
+            true,
+            false
         );
 
         var response = await handler.HandleRequestAsync(request);
@@ -71,9 +71,9 @@ public class GetAuthenticationCredentialsHandlerTests
         var handler = new GetAuthenticationCredentialsRequestHandler(tokenProvider);
         var request = new GetAuthenticationCredentialsRequest(
             new Uri("https://nuget.pkg.github.com/owner/index.json"),
-            isRetry: false,
-            isNonInteractive: false,
-            canShowDialog: true
+            false,
+            false,
+            true
         );
 
         var response = await handler.HandleRequestAsync(request);
@@ -90,9 +90,9 @@ public class GetAuthenticationCredentialsHandlerTests
         var handler = new GetAuthenticationCredentialsRequestHandler(tokenProvider);
         var request = new GetAuthenticationCredentialsRequest(
             new Uri("https://api.nuget.org/v3/index.json"),
-            isRetry: false,
-            isNonInteractive: true,
-            canShowDialog: false
+            false,
+            true,
+            false
         );
 
         var response = await handler.HandleRequestAsync(request);
@@ -113,9 +113,9 @@ public class GetAuthenticationCredentialsHandlerTests
         var handler = new GetAuthenticationCredentialsRequestHandler(tokenProvider);
         var request = new GetAuthenticationCredentialsRequest(
             new Uri("https://ghe.company.com/nuget/index.json"),
-            isRetry: false,
-            isNonInteractive: true,
-            canShowDialog: false
+            false,
+            true,
+            false
         );
 
         var response = await handler.HandleRequestAsync(request);

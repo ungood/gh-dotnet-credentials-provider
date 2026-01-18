@@ -23,7 +23,7 @@ public class GetOperationClaimsHandlerTests
 
         Assert.NotNull(response);
         Assert.Single(response.Claims);
-        Assert.Equal(OperationClaim.Authentication, response.Claims.First());
+        Assert.Equal(OperationClaim.Authentication, response.Claims[0]);
     }
 
     [Fact]
@@ -60,7 +60,7 @@ public class GetOperationClaimsHandlerTests
 
         Assert.NotNull(response);
         Assert.Single(response.Claims);
-        Assert.Equal(OperationClaim.Authentication, response.Claims.First());
+        Assert.Equal(OperationClaim.Authentication, response.Claims[0]);
     }
 
     [Fact]
@@ -77,6 +77,6 @@ public class GetOperationClaimsHandlerTests
 
         Assert.NotNull(response);
         Assert.Single(response.Claims);
-        Assert.Equal(OperationClaim.Authentication, response.Claims.First());
+        Assert.Equal(OperationClaim.Authentication, response.Claims[0]);
     }
 }

@@ -1,35 +1,26 @@
-using System;
-using System.IO;
 using NuGet.Common;
 
-namespace GhCredentialProvider.Logging
+namespace GhCredentialProvider.Logging;
+
+internal class StandardErrorLogger(string className)
 {
-    internal class StandardErrorLogger
+    private readonly string _className = className;
+    private readonly TextWriter _errorWriter = Console.Error;
+    private LogLevel _minLogLevel = LogLevel.Debug;
+
+    public void Log(LogLevel level, string message)
     {
-        private readonly TextWriter _errorWriter;
-        private readonly string _className;
-        private LogLevel _minLogLevel = LogLevel.Debug;
-
-        public StandardErrorLogger(string className)
+        if (level >= _minLogLevel)
         {
-            _errorWriter = Console.Error;
-            _className = className;
+            var levelString = level.ToString();
+            var formattedMessage = $"[{_className}] [{levelString}] {message}";
+            _errorWriter.WriteLine(formattedMessage);
+            _errorWriter.Flush();
         }
+    }
 
-        public void Log(LogLevel level, string message)
-        {
-            if (level >= _minLogLevel)
-            {
-                var levelString = level.ToString();
-                var formattedMessage = $"[{_className}] [{levelString}] {message}";
-                _errorWriter.WriteLine(formattedMessage);
-                _errorWriter.Flush();
-            }
-        }
-
-        public void SetLogLevel(LogLevel newLogLevel)
-        {
-            _minLogLevel = newLogLevel;
-        }
+    public void SetLogLevel(LogLevel newLogLevel)
+    {
+        _minLogLevel = newLogLevel;
     }
 }

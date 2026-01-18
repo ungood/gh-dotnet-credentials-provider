@@ -19,20 +19,12 @@ run = "dotnet clean"
 
 [tasks.restore]
 description = "Restore NuGet packages"
-run = '''
-dotnet restore
-dotnet tool restore
-'''
-
-[tasks.format]
-description = "Format code using CSharpier"
-depends = ["restore"]
-run = "dotnet csharpier format ."
+run = "dotnet restore"
 
 [tasks.install]
+depends = ["build-release"]
 description = "Install the plugin to the NuGet plugins directory (on macOS/Linux)"
 run = [
-  "dotnet build src/GhCredentialProvider/GhCredentialProvider.csproj -c Release",
   "mkdir -p ~/.nuget/plugins/netcore/gh-dotnet-credential-provider",
   "cp src/GhCredentialProvider/bin/Release/net10.0/*.dll ~/.nuget/plugins/netcore/gh-dotnet-credential-provider/",
   "cp src/GhCredentialProvider/bin/Release/net10.0/*.deps.json ~/.nuget/plugins/netcore/gh-dotnet-credential-provider/",

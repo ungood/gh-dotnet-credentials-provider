@@ -1,37 +1,34 @@
-using System;
-using System.IO;
 using NuGet.Versioning;
 
-namespace GhCredentialProvider
+namespace GhCredentialProvider;
+
+internal class SdkInfo
 {
-    internal class SdkInfo
+    public static bool TryGetSdkVersion(out SemanticVersion version)
     {
-        public bool TryGetSdkVersion(out SemanticVersion version)
+        try
         {
-            try
+            var sdkPath = Environment.GetEnvironmentVariable("MSBuildSDKsPath");
+            if (sdkPath != null)
             {
-                var sdkPath = Environment.GetEnvironmentVariable("MSBuildSDKsPath");
-                if (sdkPath != null)
+                var versionFile = Path.Combine(sdkPath, "..", ".version");
+                if (File.Exists(versionFile))
                 {
-                    var versionFile = Path.Combine(sdkPath, "..", ".version");
-                    if (File.Exists(versionFile))
+                    var lines = File.ReadAllLines(versionFile);
+                    if (lines.Length > 1)
                     {
-                        var lines = File.ReadAllLines(versionFile);
-                        if (lines.Length > 1)
-                        {
-                            version = SemanticVersion.Parse(lines[1]);
-                            return true;
-                        }
+                        version = SemanticVersion.Parse(lines[1]);
+                        return true;
                     }
                 }
             }
-            catch
-            {
-                // ignored
-            }
-
-            version = default(SemanticVersion);
-            return false;
         }
+        catch
+        {
+            // ignored
+        }
+
+        version = default!;
+        return false;
     }
 }

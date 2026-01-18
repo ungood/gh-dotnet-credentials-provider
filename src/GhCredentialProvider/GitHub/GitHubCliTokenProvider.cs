@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using GhCredentialProvider.Logging;
 using NuGet.Common;
@@ -36,7 +37,7 @@ public class GitHubCliTokenProvider : ITokenProvider
 
         _logger.Log(
             LogLevel.Debug,
-            $"No token found in environment variables, attempting to retrieve from gh CLI"
+            "No token found in environment variables, attempting to retrieve from gh CLI"
         );
 
         // Try to get token from gh CLI
@@ -49,7 +50,7 @@ public class GitHubCliTokenProvider : ITokenProvider
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
-                CreateNoWindow = true,
+                CreateNoWindow = true
             };
 
             using var process = new Process { StartInfo = processStartInfo };
@@ -66,13 +67,11 @@ public class GitHubCliTokenProvider : ITokenProvider
                 );
                 return output.Trim();
             }
-            else
-            {
-                _logger.Log(
-                    LogLevel.Warning,
-                    $"gh CLI command failed with exit code {process.ExitCode} for hostname: {hostname}"
-                );
-            }
+
+            _logger.Log(
+                LogLevel.Warning,
+                $"gh CLI command failed with exit code {process.ExitCode} for hostname: {hostname}"
+            );
         }
         catch (Exception ex)
         {
