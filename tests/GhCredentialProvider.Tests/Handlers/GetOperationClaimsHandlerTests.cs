@@ -1,4 +1,4 @@
-using GhCredentialProvider.Handlers;
+using GhCredentialProvider.RequestHandlers;
 using Newtonsoft.Json.Linq;
 using NuGet.Protocol.Plugins;
 using Xunit;

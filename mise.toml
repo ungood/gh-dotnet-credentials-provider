@@ -31,11 +31,15 @@ run = "dotnet csharpier format ."
 
 [tasks.install]
 description = "Install the plugin to the NuGet plugins directory (on macOS/Linux)"
-depends = ["build-release"]
 run = [
+  "dotnet build src/GhCredentialProvider/GhCredentialProvider.csproj -c Release",
   "mkdir -p ~/.nuget/plugins/netcore/gh-dotnet-credential-provider",
   "cp src/GhCredentialProvider/bin/Release/net10.0/*.dll ~/.nuget/plugins/netcore/gh-dotnet-credential-provider/",
   "cp src/GhCredentialProvider/bin/Release/net10.0/*.deps.json ~/.nuget/plugins/netcore/gh-dotnet-credential-provider/",
   "cp src/GhCredentialProvider/bin/Release/net10.0/*.runtimeconfig.json ~/.nuget/plugins/netcore/gh-dotnet-credential-provider/",
   "echo 'Plugin installed to ~/.nuget/plugins/netcore/gh-dotnet-credential-provider/'"
 ]
+
+[tasks.integ-test]
+depends = ["install"]
+run = "NUGET_PLUGIN_PATHS='' dotnet -d tool install mxt"

@@ -25,7 +25,8 @@ Implement `IRequestHandler` for: `Initialize`, `GetOperationClaims`, `GetAuthent
 
 Use these references to figure out how to implement functionality:
 
-- **[NuGet.Client Repository](https://github.com/NuGet/NuGet.Client)** - Source code for `NuGet.Protocol.Plugins`. Consult this to understand available classes, interfaces, and implementation patterns.
+- [NuGet.Client Repository](https://github.com/NuGet/NuGet.Client) - Source code for `NuGet.Protocol.Plugins`. Consult this to understand available classes, interfaces, and implementation patterns.
 - [NuGet Cross-Platform Plugins](https://learn.microsoft.com/en-us/nuget/reference/extensibility/nuget-cross-platform-plugins) - Official documentation for plugin architecture
 - [NuGet Authentication Plugin](https://learn.microsoft.com/en-us/nuget/reference/extensibility/nuget-cross-platform-authentication-plugin) - Authentication plugin specification
 - [Microsoft Artifacts Credential Provider](https://github.com/microsoft/artifacts-credprovider) - Reference implementation
+- [TeamCity Credential Provider](https://github.com/JetBrains/teamcity-nuget-support/blob/master/nuget-extensions/nuget-plugin/Program.cs) - Another reference implementation.

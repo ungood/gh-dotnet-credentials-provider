@@ -1,5 +1,5 @@
 using GhCredentialProvider.GitHub;
-using GhCredentialProvider.Handlers;
+using GhCredentialProvider.RequestHandlers;
 using NSubstitute;
 using NuGet.Protocol.Plugins;
 using Xunit;
