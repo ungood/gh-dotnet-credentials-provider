@@ -1,4 +1,6 @@
+using GhCredentialProvider.Logging;
 using Newtonsoft.Json;
+using NuGet.Common;
 using NuGet.Protocol.Plugins;
 
 namespace GhCredentialProvider.Plugin;
@@ -7,11 +9,13 @@ public class PluginHost
 {
     private readonly JsonRpc _rpc;
     private readonly PluginMessageDispatcher _dispatcher;
+    private readonly ILogger _logger;
 
-    public PluginHost(JsonRpc rpc, PluginMessageDispatcher dispatcher)
+    public PluginHost(JsonRpc rpc, PluginMessageDispatcher dispatcher, ILogger logger)
     {
         _rpc = rpc;
         _dispatcher = dispatcher;
+        _logger = logger;
     }
 
     public async Task RunAsync(CancellationToken cancellationToken = default)
@@ -26,15 +30,20 @@ public class PluginHost
                     break;
                 }
 
+                // Log received message
+                _logger.LogVerbose($"Received message: {requestJson}");
+
                 var request = JsonConvert.DeserializeObject<Message>(requestJson);
                 if (request == null)
                 {
+                    _logger.LogWarning("Failed to deserialize message");
                     continue;
                 }
 
                 // Handle Close request immediately
                 if (request.Method == MessageMethod.Close)
                 {
+                    _logger.LogInformation("Received Close request, shutting down");
                     break;
                 }
 
@@ -42,6 +51,10 @@ public class PluginHost
                 if (response != null)
                 {
                     var responseJson = JsonConvert.SerializeObject(response);
+                    
+                    // Log sent message
+                    _logger.LogVerbose($"Sent message: {responseJson}");
+                    
                     await _rpc.WriteLineAsync(responseJson, cancellationToken);
                 }
             }
@@ -51,8 +64,9 @@ public class PluginHost
             }
             catch (Exception ex)
             {
-                // Log error to stderr for debugging
-                await Console.Error.WriteLineAsync($"Plugin error: {ex.Message}");
+                // Log error using logger
+                _logger.LogError($"Plugin error: {ex.Message}");
+                _logger.LogVerbose($"Exception details: {ex}");
                 // Continue to next message instead of breaking
                 continue;
             }

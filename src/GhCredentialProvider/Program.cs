@@ -1,5 +1,6 @@
 using GhCredentialProvider.GitHub;
 using GhCredentialProvider.Handlers;
+using GhCredentialProvider.Logging;
 using GhCredentialProvider.Plugin;
 using NuGet.Protocol.Plugins;
 
@@ -24,6 +25,9 @@ class Program
 
         try
         {
+            var logger = new StandardErrorLogger();
+            logger.LogInformation("GitHub NuGet Credential Provider starting");
+
             // Create token provider
             var tokenProvider = new GitHubCliTokenProvider();
 
@@ -37,7 +41,7 @@ class Program
                     typeof(GetAuthenticationCredentialsRequest),
                     new GetAuthenticationCredentialsHandler(tokenProvider)
                 },
-                { typeof(SetLogLevelRequest), new SetLogLevelHandler() },
+                { typeof(SetLogLevelRequest), new SetLogLevelHandler(logger) },
             };
 
             // Create dispatcher
@@ -47,9 +51,10 @@ class Program
             var rpc = new JsonRpc(Console.OpenStandardInput(), Console.OpenStandardOutput());
 
             // Create and run plugin host
-            var host = new PluginHost(rpc, dispatcher);
+            var host = new PluginHost(rpc, dispatcher, logger);
             await host.RunAsync();
 
+            logger.LogInformation("GitHub NuGet Credential Provider shutting down");
             return 0;
         }
         catch (Exception ex)

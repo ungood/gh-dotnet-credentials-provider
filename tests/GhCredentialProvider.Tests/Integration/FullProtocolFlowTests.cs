@@ -1,6 +1,7 @@
 using System.Text;
 using GhCredentialProvider.GitHub;
 using GhCredentialProvider.Handlers;
+using GhCredentialProvider.Logging;
 using GhCredentialProvider.Plugin;
 using Newtonsoft.Json;
 using NSubstitute;
@@ -105,8 +106,9 @@ public class FullProtocolFlowTests
         await writer.FlushAsync();
         inputStream.Position = 0;
 
+        var logger = new StandardErrorLogger();
         var rpc = new JsonRpc(inputStream, outputStream);
-        var host = new PluginHost(rpc, dispatcher);
+        var host = new PluginHost(rpc, dispatcher, logger);
 
         // Run the host (it will process all messages)
         var cts = new CancellationTokenSource();
