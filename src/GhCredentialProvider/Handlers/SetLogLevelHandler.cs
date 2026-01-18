@@ -1,47 +1,45 @@
-using Newtonsoft.Json.Linq;
+using GhCredentialProvider.Logging;
 using NuGet.Common;
 using NuGet.Protocol.Plugins;
 
 namespace GhCredentialProvider.Handlers;
 
-public class SetLogLevelHandler : IMessageHandler
+public class SetLogLevelRequestHandler : IRequestHandler
 {
     private readonly ILogger _logger;
 
-    public SetLogLevelHandler(ILogger logger)
+    public SetLogLevelRequestHandler()
     {
-        _logger = logger;
+        _logger = new StandardErrorLogger(nameof(SetLogLevelRequestHandler));
     }
 
-    public Task<Message> HandleAsync(Message request, CancellationToken cancellationToken = default)
+    public Task<SetLogLevelResponse> HandleRequestAsync(
+        SetLogLevelRequest request,
+        CancellationToken cancellationToken
+    )
     {
-        var payload = MessageUtilities.DeserializePayload<SetLogLevelRequest>(request);
-        if (payload == null)
-        {
-            return Task.FromResult(CreateErrorResponse(request.RequestId));
-        }
+        _logger.LogInformation($"Received SetLogLevel request: LogLevel={request.LogLevel}");
 
-        // Note: NuGet.Common.ILogger doesn't have a SetLogLevel method
-        // The log level is typically controlled by the logger implementation itself
-        _logger.LogInformation($"Log level requested: {payload.LogLevel}");
-
+        // TODO: Update logger verbosity level based on request
         var response = new SetLogLevelResponse(MessageResponseCode.Success);
-        var payloadJson = JObject.FromObject(response);
-        return Task.FromResult(
-            new Message(
-                request.RequestId,
-                MessageType.Response,
-                MessageMethod.SetLogLevel,
-                payloadJson
-            )
+
+        _logger.LogInformation(
+            $"Sending SetLogLevel response: ResponseCode={response.ResponseCode}"
         );
+        return Task.FromResult(response);
     }
 
-    private Message CreateErrorResponse(string requestId)
+    public Task HandleResponseAsync(
+        IConnection connection,
+        Message message,
+        IResponseHandler responseHandler,
+        CancellationToken cancellationToken
+    )
     {
-        _logger.LogWarning($"Failed to set log level for request {requestId}");
-        var errorResponse = new SetLogLevelResponse(MessageResponseCode.Error);
-        var payloadJson = JObject.FromObject(errorResponse);
-        return new Message(requestId, MessageType.Response, MessageMethod.SetLogLevel, payloadJson);
+        // This method is for handling responses, not requests
+        // For request handlers, this is typically not used
+        return Task.CompletedTask;
     }
+
+    public CancellationToken CancellationToken => CancellationToken.None;
 }

@@ -8,119 +8,71 @@ namespace GhCredentialProvider.Tests.Handlers;
 public class GetOperationClaimsHandlerTests
 {
     [Fact]
-    public async Task HandleAsync_WithGitHubPackageSource_ReturnsAuthenticationClaim()
+    public async Task HandleRequestAsync_WithGitHubPackageSource_ReturnsAuthenticationClaim()
     {
-        var handler = new GetOperationClaimsHandler();
-        var requestPayload = new GetOperationClaimsRequest(
+        var handler = new GetOperationClaimsRequestHandler();
+        var request = new GetOperationClaimsRequest(
             "https://nuget.pkg.github.com/owner/index.json",
             JObject.FromObject(
                 new { PackageSourceRepository = "https://nuget.pkg.github.com/owner/index.json" }
             )
         );
-        var payloadJson = JObject.FromObject(requestPayload);
-        var request = new Message(
-            "claims-789",
-            MessageType.Request,
-            MessageMethod.GetOperationClaims,
-            payloadJson
-        );
 
-        var response = await handler.HandleAsync(request);
+        var response = await handler.HandleRequestAsync(request, CancellationToken.None);
 
         Assert.NotNull(response);
-        Assert.Equal(MessageType.Response, response.Type);
-        var responsePayload = MessageUtilities.DeserializePayload<GetOperationClaimsResponse>(
-            response
-        );
-        Assert.NotNull(responsePayload);
-        Assert.Single(responsePayload.Claims);
-        Assert.Equal(OperationClaim.Authentication, responsePayload.Claims.First());
+        Assert.Single(response.Claims);
+        Assert.Equal(OperationClaim.Authentication, response.Claims.First());
     }
 
     [Fact]
-    public async Task HandleAsync_WithNonGitHubPackageSource_ReturnsEmptyClaims()
+    public async Task HandleRequestAsync_WithNonGitHubPackageSource_ReturnsEmptyClaims()
     {
-        var handler = new GetOperationClaimsHandler();
-        var requestPayload = new GetOperationClaimsRequest(
+        var handler = new GetOperationClaimsRequestHandler();
+        var request = new GetOperationClaimsRequest(
             "https://api.nuget.org/v3/index.json",
             JObject.FromObject(
                 new { PackageSourceRepository = "https://api.nuget.org/v3/index.json" }
             )
         );
-        var payloadJson = JObject.FromObject(requestPayload);
-        var request = new Message(
-            "claims-789",
-            MessageType.Request,
-            MessageMethod.GetOperationClaims,
-            payloadJson
-        );
 
-        var response = await handler.HandleAsync(request);
+        var response = await handler.HandleRequestAsync(request, CancellationToken.None);
 
         Assert.NotNull(response);
-        Assert.Equal(MessageType.Response, response.Type);
-        var responsePayload = MessageUtilities.DeserializePayload<GetOperationClaimsResponse>(
-            response
-        );
-        Assert.NotNull(responsePayload);
-        Assert.Empty(responsePayload.Claims);
+        Assert.Empty(response.Claims);
     }
 
     [Fact]
-    public async Task HandleAsync_WithGitHubEnterprise_ReturnsAuthenticationClaim()
+    public async Task HandleRequestAsync_WithGitHubEnterprise_ReturnsAuthenticationClaim()
     {
-        var handler = new GetOperationClaimsHandler();
-        var requestPayload = new GetOperationClaimsRequest(
+        var handler = new GetOperationClaimsRequestHandler();
+        var request = new GetOperationClaimsRequest(
             "https://ghe.company.com/nuget/index.json",
             JObject.FromObject(
                 new { PackageSourceRepository = "https://ghe.company.com/nuget/index.json" }
             )
         );
-        var payloadJson = JObject.FromObject(requestPayload);
-        var request = new Message(
-            "claims-789",
-            MessageType.Request,
-            MessageMethod.GetOperationClaims,
-            payloadJson
-        );
 
-        var response = await handler.HandleAsync(request);
+        var response = await handler.HandleRequestAsync(request, CancellationToken.None);
 
         Assert.NotNull(response);
-        Assert.Equal(MessageType.Response, response.Type);
-        var responsePayload = MessageUtilities.DeserializePayload<GetOperationClaimsResponse>(
-            response
-        );
-        Assert.NotNull(responsePayload);
-        Assert.Single(responsePayload.Claims);
-        Assert.Equal(OperationClaim.Authentication, responsePayload.Claims.First());
+        Assert.Single(response.Claims);
+        Assert.Equal(OperationClaim.Authentication, response.Claims.First());
     }
 
     [Fact]
-    public async Task HandleAsync_WithNullServiceIndexButGitHubPackageSource_ReturnsAuthenticationClaim()
+    public async Task HandleRequestAsync_WithNullServiceIndexButGitHubPackageSource_ReturnsAuthenticationClaim()
     {
-        var handler = new GetOperationClaimsHandler();
-        var requestPayload = new GetOperationClaimsRequest(
+        var handler = new GetOperationClaimsRequestHandler();
+        var request = new GetOperationClaimsRequest(
             "https://nuget.pkg.github.com/owner/index.json",
             null
         );
-        var payloadJson = JObject.FromObject(requestPayload);
-        var request = new Message(
-            "claims-789",
-            MessageType.Request,
-            MessageMethod.GetOperationClaims,
-            payloadJson
-        );
 
-        var response = await handler.HandleAsync(request);
+        var response = await handler.HandleRequestAsync(request, CancellationToken.None);
 
         Assert.NotNull(response);
-        Assert.Equal(MessageType.Response, response.Type);
-        var responsePayload = MessageUtilities.DeserializePayload<GetOperationClaimsResponse>(
-            response
-        );
-        Assert.NotNull(responsePayload);
-        Assert.Single(responsePayload.Claims);
-        Assert.Equal(OperationClaim.Authentication, responsePayload.Claims.First());
+        Assert.Single(response.Claims);
+        Assert.Equal(OperationClaim.Authentication, response.Claims.First());
     }
 }

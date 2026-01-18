@@ -1,22 +1,31 @@
 using GhCredentialProvider.GitHub;
-using Newtonsoft.Json.Linq;
+using GhCredentialProvider.Logging;
+using NuGet.Common;
 using NuGet.Protocol.Plugins;
 
 namespace GhCredentialProvider.Handlers;
 
-public class GetOperationClaimsHandler : IMessageHandler
+public class GetOperationClaimsRequestHandler : IRequestHandler
 {
-    public Task<Message> HandleAsync(Message request, CancellationToken cancellationToken = default)
+    private readonly ILogger _logger;
+
+    public GetOperationClaimsRequestHandler()
     {
-        var payload = MessageUtilities.DeserializePayload<GetOperationClaimsRequest>(request);
-        if (payload == null)
-        {
-            return Task.FromResult(CreateErrorResponse(request.RequestId));
-        }
+        _logger = new StandardErrorLogger(nameof(GetOperationClaimsRequestHandler));
+    }
+
+    public Task<GetOperationClaimsResponse> HandleRequestAsync(
+        GetOperationClaimsRequest request,
+        CancellationToken cancellationToken
+    )
+    {
+        var packageSource = request.PackageSourceRepository?.ToString() ?? "";
+        var serviceIndex = request.ServiceIndex?.ToString() ?? "";
+        _logger.LogInformation(
+            $"Received GetOperationClaims request: PackageSource={packageSource}, ServiceIndex={serviceIndex}"
+        );
 
         // Check if the package source is a GitHub host
-        var packageSource = payload.PackageSourceRepository?.ToString() ?? "";
-        var serviceIndex = payload.ServiceIndex?.ToString() ?? "";
         var isGitHub =
             GitHubHostDetector.IsGitHubHost(packageSource)
             || GitHubHostDetector.IsGitHubHost(serviceIndex);
@@ -25,29 +34,31 @@ public class GetOperationClaimsHandler : IMessageHandler
         if (isGitHub)
         {
             claims.Add(OperationClaim.Authentication);
+            _logger.LogInformation($"GitHub host detected, adding Authentication claim");
+        }
+        else
+        {
+            _logger.LogInformation($"Not a GitHub host, no claims added");
         }
 
         var response = new GetOperationClaimsResponse(claims);
-        var payloadJson = JObject.FromObject(response);
-        return Task.FromResult(
-            new Message(
-                request.RequestId,
-                MessageType.Response,
-                MessageMethod.GetOperationClaims,
-                payloadJson
-            )
+        _logger.LogInformation(
+            $"Sending GetOperationClaims response: Claims={string.Join(", ", claims)}"
         );
+        return Task.FromResult(response);
     }
 
-    private static Message CreateErrorResponse(string requestId)
+    public Task HandleResponseAsync(
+        IConnection connection,
+        Message message,
+        IResponseHandler responseHandler,
+        CancellationToken cancellationToken
+    )
     {
-        var errorResponse = new GetOperationClaimsResponse(new List<OperationClaim>());
-        var payloadJson = JObject.FromObject(errorResponse);
-        return new Message(
-            requestId,
-            MessageType.Response,
-            MessageMethod.GetOperationClaims,
-            payloadJson
-        );
+        // This method is for handling responses, not requests
+        // For request handlers, this is typically not used
+        return Task.CompletedTask;
     }
+
+    public CancellationToken CancellationToken => CancellationToken.None;
 }

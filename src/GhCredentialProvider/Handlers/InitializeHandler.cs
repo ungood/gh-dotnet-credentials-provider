@@ -1,37 +1,48 @@
-using Newtonsoft.Json.Linq;
+using GhCredentialProvider.Logging;
+using NuGet.Common;
 using NuGet.Protocol.Plugins;
 
 namespace GhCredentialProvider.Handlers;
 
-public class InitializeHandler : IMessageHandler
+public class InitializeRequestHandler : IRequestHandler
 {
-    public Task<Message> HandleAsync(Message request, CancellationToken cancellationToken = default)
+    private readonly ILogger _logger;
+
+    public InitializeRequestHandler()
     {
-        var payload = MessageUtilities.DeserializePayload<InitializeRequest>(request);
-        if (payload == null)
-        {
-            return Task.FromResult(CreateErrorResponse(request.RequestId));
-        }
+        _logger = new StandardErrorLogger(nameof(InitializeRequestHandler));
+    }
+
+    public Task<InitializeResponse> HandleRequestAsync(
+        InitializeRequest request,
+        CancellationToken cancellationToken
+    )
+    {
+        _logger.LogInformation(
+            $"Received Initialize request: ClientVersion={request.ClientVersion}"
+        );
 
         // Store client version and settings if needed
         // For now, just acknowledge initialization
-
         var response = new InitializeResponse(MessageResponseCode.Success);
-        var payloadJson = JObject.FromObject(response);
-        return Task.FromResult(
-            new Message(
-                request.RequestId,
-                MessageType.Response,
-                MessageMethod.Initialize,
-                payloadJson
-            )
+
+        _logger.LogInformation(
+            $"Sending Initialize response: ResponseCode={response.ResponseCode}"
         );
+        return Task.FromResult(response);
     }
 
-    private static Message CreateErrorResponse(string requestId)
+    public Task HandleResponseAsync(
+        IConnection connection,
+        Message message,
+        IResponseHandler responseHandler,
+        CancellationToken cancellationToken
+    )
     {
-        var errorResponse = new InitializeResponse(MessageResponseCode.Error);
-        var payloadJson = JObject.FromObject(errorResponse);
-        return new Message(requestId, MessageType.Response, MessageMethod.Initialize, payloadJson);
+        // This method is for handling responses, not requests
+        // For request handlers, this is typically not used
+        return Task.CompletedTask;
     }
+
+    public CancellationToken CancellationToken => CancellationToken.None;
 }

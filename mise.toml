@@ -19,7 +19,10 @@ run = "dotnet clean"
 
 [tasks.restore]
 description = "Restore NuGet packages"
-run = "dotnet restore"
+run = '''
+dotnet restore
+dotnet tool restore
+'''
 
 [tasks.format]
 description = "Format code using CSharpier"

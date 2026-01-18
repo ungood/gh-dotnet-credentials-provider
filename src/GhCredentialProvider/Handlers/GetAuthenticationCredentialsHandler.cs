@@ -1,92 +1,113 @@
 using GhCredentialProvider.GitHub;
-using Newtonsoft.Json.Linq;
+using GhCredentialProvider.Logging;
+using NuGet.Common;
 using NuGet.Protocol.Plugins;
 
 namespace GhCredentialProvider.Handlers;
 
-public class GetAuthenticationCredentialsHandler : IMessageHandler
+public class GetAuthenticationCredentialsRequestHandler : IRequestHandler
 {
+    private readonly ILogger _logger = new StandardErrorLogger(
+        nameof(GetAuthenticationCredentialsRequestHandler)
+    );
     private readonly ITokenProvider _tokenProvider;
 
-    public GetAuthenticationCredentialsHandler(ITokenProvider tokenProvider)
+    public GetAuthenticationCredentialsRequestHandler(ITokenProvider tokenProvider)
     {
         _tokenProvider = tokenProvider;
     }
 
-    public async Task<Message> HandleAsync(
-        Message request,
-        CancellationToken cancellationToken = default
+    public async Task<GetAuthenticationCredentialsResponse> HandleRequestAsync(
+        GetAuthenticationCredentialsRequest request,
+        CancellationToken cancellationToken
     )
     {
-        var payload = MessageUtilities.DeserializePayload<GetAuthenticationCredentialsRequest>(
-            request
+        var uri = request.Uri?.ToString() ?? "";
+        _logger.LogInformation(
+            $"Received GetAuthenticationCredentials request: Uri={uri}, IsNonInteractive={request.IsNonInteractive}"
         );
-        if (payload == null)
-        {
-            return CreateErrorResponse(request.RequestId, "Invalid request");
-        }
 
         // Verify this is a GitHub host
-        var uri = payload.Uri?.ToString() ?? "";
         if (!GitHubHostDetector.IsGitHubHost(uri))
         {
-            return CreateErrorResponse(request.RequestId, "Not a GitHub package source");
+            _logger.LogWarning($"Not a GitHub host: {uri}");
+            var response = new GetAuthenticationCredentialsResponse(
+                username: null,
+                password: null,
+                message: "Not a GitHub package source",
+                authenticationTypes: new List<string>(),
+                responseCode: MessageResponseCode.Error
+            );
+            _logger.LogInformation(
+                $"Sending GetAuthenticationCredentials response: ResponseCode={response.ResponseCode}, Message={response.Message}"
+            );
+            return response;
         }
 
-        // Extract hostname for token retrieval
         var hostname = GitHubHostDetector.ExtractHostname(uri) ?? "github.com";
+        _logger.LogInformation($"Extracted hostname: {hostname}");
 
-        // Get token
+        _logger.LogDebug($"Attempting to retrieve token for hostname: {hostname}");
         var token = await _tokenProvider.GetTokenAsync(hostname, cancellationToken);
 
         if (string.IsNullOrWhiteSpace(token))
         {
-            if (payload.IsNonInteractive)
+            _logger.LogWarning($"No token retrieved for hostname: {hostname}");
+            GetAuthenticationCredentialsResponse response;
+
+            if (request.IsNonInteractive)
             {
-                return CreateErrorResponse(
-                    request.RequestId,
-                    "No GitHub token available and non-interactive mode is enabled. Set GH_TOKEN or GITHUB_TOKEN environment variable, or run 'gh auth login'."
+                response = new GetAuthenticationCredentialsResponse(
+                    username: null,
+                    password: null,
+                    message: "No GitHub token available and non-interactive mode is enabled. Set GH_TOKEN or GITHUB_TOKEN environment variable, or run 'gh auth login'.",
+                    authenticationTypes: new List<string>(),
+                    responseCode: MessageResponseCode.Error
+                );
+            }
+            else
+            {
+                response = new GetAuthenticationCredentialsResponse(
+                    username: null,
+                    password: null,
+                    message: "Unable to retrieve GitHub token. Ensure 'gh' CLI is installed and authenticated, or set GH_TOKEN or GITHUB_TOKEN environment variable.",
+                    authenticationTypes: new List<string>(),
+                    responseCode: MessageResponseCode.Error
                 );
             }
 
-            return CreateErrorResponse(
-                request.RequestId,
-                "Unable to retrieve GitHub token. Ensure 'gh' CLI is installed and authenticated, or set GH_TOKEN or GITHUB_TOKEN environment variable."
+            _logger.LogInformation(
+                $"Sending GetAuthenticationCredentials response: ResponseCode={response.ResponseCode}, Message={response.Message}"
             );
+            return response;
         }
 
         // Return credentials
-        var response = new GetAuthenticationCredentialsResponse(
+        _logger.LogInformation($"Token retrieved successfully for hostname: {hostname}");
+        var successResponse = new GetAuthenticationCredentialsResponse(
             username: "USERNAME", // GitHub Packages accepts any username when using PAT
             password: token,
             message: "Credentials retrieved successfully",
             authenticationTypes: new List<string> { "GitHubPAT" },
             responseCode: MessageResponseCode.Success
         );
-        var payloadJson = JObject.FromObject(response);
-        return new Message(
-            request.RequestId,
-            MessageType.Response,
-            MessageMethod.GetAuthenticationCredentials,
-            payloadJson
+        _logger.LogInformation(
+            $"Sending GetAuthenticationCredentials response: ResponseCode={successResponse.ResponseCode}, Message={successResponse.Message}"
         );
+        return successResponse;
     }
 
-    private static Message CreateErrorResponse(string requestId, string message)
+    public Task HandleResponseAsync(
+        IConnection connection,
+        Message message,
+        IResponseHandler responseHandler,
+        CancellationToken cancellationToken
+    )
     {
-        var errorResponse = new GetAuthenticationCredentialsResponse(
-            username: null,
-            password: null,
-            message: message,
-            authenticationTypes: new List<string>(),
-            responseCode: MessageResponseCode.Error
-        );
-        var payloadJson = JObject.FromObject(errorResponse);
-        return new Message(
-            requestId,
-            MessageType.Response,
-            MessageMethod.GetAuthenticationCredentials,
-            payloadJson
-        );
+        // This method is for handling responses, not requests
+        // For request handlers, this is typically not used
+        return Task.CompletedTask;
     }
+
+    public CancellationToken CancellationToken { get; }
 }

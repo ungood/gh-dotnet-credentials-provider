@@ -1,25 +1,21 @@
-using Newtonsoft.Json.Linq;
 using NuGet.Protocol.Plugins;
 using NuGet.Versioning;
 
 namespace GhCredentialProvider.Handlers;
 
-public class HandshakeHandler : IMessageHandler
+public class HandshakeRequestHandler : IRequestHandler
 {
     private const string SupportedProtocolVersion = "2.0.0";
     private const string MinimumProtocolVersion = "2.0.0";
 
-    public Task<Message> HandleAsync(Message request, CancellationToken cancellationToken = default)
+    public Task<HandshakeResponse> HandleRequestAsync(
+        HandshakeRequest request,
+        CancellationToken cancellationToken
+    )
     {
-        var payload = MessageUtilities.DeserializePayload<HandshakeRequest>(request);
-        if (payload == null)
-        {
-            return Task.FromResult(CreateErrorResponse(request.RequestId));
-        }
-
         // Negotiate protocol version
-        var requestedVersion = payload.ProtocolVersion;
-        var minimumVersion = payload.MinimumProtocolVersion;
+        var requestedVersion = request.ProtocolVersion;
+        var minimumVersion = request.MinimumProtocolVersion;
 
         // Check if we support the requested version
         var supported = SemanticVersion.Parse(SupportedProtocolVersion);
@@ -28,25 +24,25 @@ public class HandshakeHandler : IMessageHandler
         if (requestedVersion >= minimum && requestedVersion <= supported)
         {
             var response = new HandshakeResponse(MessageResponseCode.Success, supported);
-            var payloadJson = JObject.FromObject(response);
-            return Task.FromResult(
-                new Message(
-                    request.RequestId,
-                    MessageType.Response,
-                    MessageMethod.Handshake,
-                    payloadJson
-                )
-            );
+            return Task.FromResult(response);
         }
 
         // Version negotiation failed
-        return Task.FromResult(CreateErrorResponse(request.RequestId));
+        var errorResponse = new HandshakeResponse(MessageResponseCode.Error, null);
+        return Task.FromResult(errorResponse);
     }
 
-    private static Message CreateErrorResponse(string requestId)
+    public Task HandleResponseAsync(
+        IConnection connection,
+        Message message,
+        IResponseHandler responseHandler,
+        CancellationToken cancellationToken
+    )
     {
-        var errorResponse = new HandshakeResponse(MessageResponseCode.Error, null);
-        var payloadJson = JObject.FromObject(errorResponse);
-        return new Message(requestId, MessageType.Response, MessageMethod.Handshake, payloadJson);
+        // This method is for handling responses, not requests
+        // For request handlers, this is typically not used
+        return Task.CompletedTask;
     }
+
+    public CancellationToken CancellationToken => CancellationToken.None;
 }
