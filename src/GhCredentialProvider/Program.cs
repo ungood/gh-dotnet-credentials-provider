@@ -1,119 +1,183 @@
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using GhCredentialProvider.GitHub;
-using GhCredentialProvider.Handlers;
 using GhCredentialProvider.Logging;
+using GhCredentialProvider.RequestHandlers;
 using NuGet.Common;
 using NuGet.Protocol.Plugins;
+using ILogger = GhCredentialProvider.Logging.ILogger;
 
-namespace GhCredentialProvider;
-
-class Program
+namespace GhCredentialProvider
 {
-    private static readonly ILogger _logger = new StandardErrorLogger(
-        Environment.ProcessPath ?? "gh-dotnet-credential-provider"
-    );
-
-    static async Task<int> Main(string[] args)
+  internal static class Program
+  {
+    public static int Main(string[] args)
     {
-        // Check if running as a plugin
-        if (args.Length == 0 || args[0] != "-Plugin")
-        {
-            Console.WriteLine("GitHub NuGet Credential Provider");
-            Console.WriteLine(
-                "This is a NuGet cross-platform plugin. It should be invoked by NuGet client tools."
-            );
-            Console.WriteLine(
-                "For more information, see: https://learn.microsoft.com/en-us/nuget/reference/extensibility/nuget-cross-platform-plugins"
-            );
-            return 1;
-        }
+      DebugBreakIfPluginDebuggingIsEnabled();
 
-        _logger.LogInformation("Starting GitHub NuGet Credential Provider plugin");
+      var tokenSource = new CancellationTokenSource();
+      var multiLogger = new MultiLogger();
+
+      var fileLogger = GetFileLogger();
+      if (fileLogger != null)
+      {
+        multiLogger.Add(fileLogger);
+      }
+
+      multiLogger.Log(LogLevel.Verbose, "Entered nuget credentials plugin");
+
+      Console.CancelKeyPress += (sender, eventArgs) =>
+                                {
+                                  tokenSource.Cancel();
+                                  eventArgs.Cancel = true;
+                                };
+
+      try
+      {
+        return MainInternal(tokenSource, multiLogger, args).GetAwaiter().GetResult();
+      }
+      catch (OperationCanceledException e)
+      {
+        // Multiple source restoration. Request will be cancelled if a package has been successfully restored from another source
+        multiLogger.Log(LogLevel.Verbose, $"Request to credential provider was cancelled. Message: {e.Message}");
+        return 0;
+      }
+    }
+
+    private static async Task<int> MainInternal(CancellationTokenSource tokenSource, MultiLogger multiLogger, string[] args)
+    {
+      var tokenProvider = new GitHubCliTokenProvider();
+      var credentialProvider = new GhCredentialProvider(multiLogger, tokenProvider);
+      var sdkInfo = new SdkInfo();
+      var requestHandlers = new RequestHandlerCollection
+                            {
+                              {
+                                MessageMethod.GetAuthenticationCredentials,
+                                new GetAuthenticationCredentialsRequestHandler(multiLogger, credentialProvider)
+                              },
+                              {
+                                MessageMethod.GetOperationClaims,
+                                new GetOperationClaimsRequestHandler(multiLogger, credentialProvider, sdkInfo)
+                              },
+                              {
+                                MessageMethod.SetLogLevel,
+                                new SetLogLevelHandler(multiLogger)
+                              },
+                              {
+                                MessageMethod.Initialize,
+                                new InitializeRequestHandler(multiLogger)
+                              },
+                              {
+                                MessageMethod.SetCredentials,
+                                new SetCredentialsRequestHandler(multiLogger)
+                              }
+                            };
+
+      if (String.Equals(args.SingleOrDefault(), "-plugin", StringComparison.OrdinalIgnoreCase))
+      {
+        multiLogger.Log(LogLevel.Verbose, "Running in plug-in mode");
 
         try
         {
-            var requestHandlers = new RequestHandlers();
-            requestHandlers.TryAdd(MessageMethod.Initialize, new InitializeRequestHandler());
-            requestHandlers.TryAdd(
-                MessageMethod.GetOperationClaims,
-                new GetOperationClaimsRequestHandler()
-            );
-            requestHandlers.TryAdd(
-                MessageMethod.GetAuthenticationCredentials,
-                new GetAuthenticationCredentialsRequestHandler(new GitHubCliTokenProvider())
-            );
-            requestHandlers.TryAdd(MessageMethod.SetLogLevel, new SetLogLevelRequestHandler());
-
-            _logger.LogInformation(
-                "Request handlers registered: Initialize, GetOperationClaims, GetAuthenticationCredentials, SetLogLevel"
-            );
-
-            _logger.LogDebug("Creating plugin");
-            var cancellationTokenSource = new CancellationTokenSource();
-            using (
-                IPlugin plugin = await PluginFactory
-                    .CreateFromCurrentProcessAsync(
-                        requestHandlers,
-                        ConnectionOptions.CreateDefault(),
-                        cancellationTokenSource.Token
-                    )
-                    .ConfigureAwait(continueOnCapturedContext: false)
-            )
-            {
-                _logger.LogInformation("Plugin created and running, waiting for exit");
-                await WaitForPluginExitAsync(plugin, TimeSpan.FromMinutes(2));
-                _logger.LogInformation("Plugin shutdown complete");
-            }
-
-            return 0;
+          using (IPlugin plugin = await PluginFactory
+            .CreateFromCurrentProcessAsync(requestHandlers, ConnectionOptions.CreateDefault(), CancellationToken.None)
+            .ConfigureAwait(continueOnCapturedContext: false))
+          {
+            multiLogger.Add(new PluginConnectionLogger(plugin.Connection));
+            await RunNuGetPluginsAsync(plugin, multiLogger, tokenSource.Token).ConfigureAwait(continueOnCapturedContext: false);
+          }
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e)
         {
-            // When restoring from multiple sources, one of the sources will throw an unhandled TaskCanceledException
-            // if it has been restored successfully from a different source.
-            _logger.LogInformation(
-                "Operation was canceled (this may be expected when restoring from multiple sources)"
-            );
-            return 0;
+          // Multiple source restoration. Request will be cancelled if a package has been successfully restored from another source
+          multiLogger.Log(LogLevel.Verbose, $"Request to credential provider was cancelled. Message: {e.Message}");
         }
-        catch (Exception ex)
+
+        return 0;
+      }
+
+      if (requestHandlers.TryGet(MessageMethod.GetAuthenticationCredentials, out IRequestHandler requestHandler) &&
+          requestHandler is GetAuthenticationCredentialsRequestHandler getAuthenticationCredentialsRequestHandler)
+      {
+        multiLogger.Log(LogLevel.Verbose, "Running in stand-alone mode");
+
+        if (args.Length == 0)
         {
-            _logger.LogError($"Error in plugin: {ex.Message}");
-            _logger.LogDebug($"Exception details: {ex}");
-            await Console.Error.WriteLineAsync($"Error in plugin: {ex.Message}");
-            return 1;
+          Console.WriteLine("Usage: gh-dotnet-credential-provider <NuGetFeedUrl>");
+          return 1;
         }
+
+        var request = new GetAuthenticationCredentialsRequest(
+          uri: new Uri(args[0]),
+          isRetry: false,
+          isNonInteractive: true,
+          canShowDialog: false
+        );
+        var response = getAuthenticationCredentialsRequestHandler.HandleRequestAsync(request).GetAwaiter().GetResult();
+
+        Console.WriteLine(response?.Username);
+        Console.WriteLine(response?.Password);
+        Console.WriteLine(response?.Password?.ToJsonWebTokenString());
+
+        return 0;
+      }
+
+      return -1;
     }
 
-    private static async Task WaitForPluginExitAsync(IPlugin plugin, TimeSpan shutdownTimeout)
+    private static async Task RunNuGetPluginsAsync(IPlugin plugin, ILogger logger, CancellationToken cancellationToken)
     {
-        var beginShutdownTaskSource = new TaskCompletionSource<object?>();
-        var endShutdownTaskSource = new TaskCompletionSource<object?>();
+      SemaphoreSlim semaphore = new SemaphoreSlim(0);
 
-        plugin.BeforeClose += (sender, args) =>
-        {
-            _logger.LogDebug("Plugin BeforeClose event received");
-            beginShutdownTaskSource.TrySetResult(null);
-        };
+      plugin.Connection.Faulted += (sender, a) =>
+                                   {
+                                     logger.Log(LogLevel.Error, $"Faulted on message: {a.Message?.Type} {a.Message?.Method} {a.Message?.RequestId}");
+                                     logger.Log(LogLevel.Error, a.Exception.ToString());
+                                   };
 
-        plugin.Closed += (sender, a) =>
-        {
-            _logger.LogDebug("Plugin Closed event received");
-            beginShutdownTaskSource.TrySetResult(null);
-            endShutdownTaskSource.TrySetResult(null);
-        };
+      plugin.Closed += (sender, a) => semaphore.Release();
 
-        await beginShutdownTaskSource.Task;
-        _logger.LogDebug($"Waiting for plugin shutdown (timeout: {shutdownTimeout.TotalSeconds}s)");
-        using (
-            new Timer(
-                _ => endShutdownTaskSource.TrySetCanceled(),
-                null,
-                shutdownTimeout,
-                TimeSpan.FromMilliseconds(-1)
-            )
-        )
-        {
-            await endShutdownTaskSource.Task;
-        }
+      bool complete = await semaphore.WaitAsync(TimeSpan.FromDays(1), cancellationToken)
+        .ConfigureAwait(continueOnCapturedContext: false);
+
+      if (!complete)
+      {
+        logger.Log(LogLevel.Error, "Timed out waiting for plug-in operations to complete");
+      }
     }
+
+    private static void DebugBreakIfPluginDebuggingIsEnabled()
+    {
+      if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("NUGET_PLUGIN_DEBUG")))
+      {
+        while (!Debugger.IsAttached)
+        {
+          Thread.Sleep(100);
+        }
+      }
+    }
+    
+    private static FileLogger? GetFileLogger()
+    {
+      var location = Environment.GetEnvironmentVariable("NUGET_PLUGIN_LOG_PATH");
+      if (string.IsNullOrEmpty(location))
+      {
+        return null;
+      }
+
+      var directoryName = Path.GetDirectoryName(location);
+      if (!string.IsNullOrEmpty(directoryName))
+      {
+        Directory.CreateDirectory(directoryName);
+      }
+      var fileLogger = new FileLogger(location);
+      fileLogger.SetLogLevel(LogLevel.Verbose);
+
+      return fileLogger;
+    }
+  }
 }
