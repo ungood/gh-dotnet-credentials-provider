@@ -5,15 +5,17 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
-  
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
   - package-ecosystem: "nuget"
-    directory: "/src/GhCredentialProvider"
+    directory: "/"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
-  
-  - package-ecosystem: "nuget"
-    directory: "/tests/GhCredentialProvider.Tests"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
+    groups:
+      nuget-dependencies:
+        patterns:
+          - "*"
