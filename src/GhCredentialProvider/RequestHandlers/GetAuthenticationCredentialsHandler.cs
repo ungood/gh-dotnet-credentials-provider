@@ -4,12 +4,6 @@ using NuGet.Protocol.Plugins;
 
 namespace GhCredentialProvider.RequestHandlers;
 
-/// <summary>
-///     Handles a <see cref="GetAuthenticationCredentialsRequest" /> and replies with credentials.
-/// </summary>
-/// <remarks>
-///     Initializes a new instance of the <see cref="GetAuthenticationCredentialsHandler" /> class.
-/// </remarks>
 /// <param name="tokenProvider">An <see cref="ITokenProvider" /> to use for retrieving tokens.</param>
 internal class GetAuthenticationCredentialsHandler(ITokenProvider tokenProvider)
     : BaseRequestHandler<

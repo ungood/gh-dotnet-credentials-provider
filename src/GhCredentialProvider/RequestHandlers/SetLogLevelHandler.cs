@@ -2,9 +2,6 @@ using NuGet.Protocol.Plugins;
 
 namespace GhCredentialProvider.RequestHandlers;
 
-/// <summary>
-///     Handles a <see cref="SetLogLevelRequest" /> and replies with credentials.
-/// </summary>
 internal class SetLogLevelHandler : BaseRequestHandler<SetLogLevelRequest, SetLogLevelResponse>
 {
     public override Task<SetLogLevelResponse> HandleRequestAsync(SetLogLevelRequest request)

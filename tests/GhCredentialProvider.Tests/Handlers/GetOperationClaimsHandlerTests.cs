@@ -10,8 +10,7 @@ public class GetOperationClaimsHandlerTests
     [Fact]
     public async Task HandleRequestAsync_WithGitHubPackageSource_ReturnsAuthenticationClaim()
     {
-        var sdkInfo = new SdkInfo();
-        var handler = new GetOperationClaimsHandler(sdkInfo);
+        var handler = new GetOperationClaimsHandler();
         var request = new GetOperationClaimsRequest(
             "https://nuget.pkg.github.com/owner/index.json",
             JObject.FromObject(
@@ -29,8 +28,7 @@ public class GetOperationClaimsHandlerTests
     [Fact]
     public async Task HandleRequestAsync_WithNonGitHubPackageSource_ReturnsEmptyClaims()
     {
-        var sdkInfo = new SdkInfo();
-        var handler = new GetOperationClaimsHandler(sdkInfo);
+        var handler = new GetOperationClaimsHandler();
         var request = new GetOperationClaimsRequest(
             "https://api.nuget.org/v3/index.json",
             JObject.FromObject(
@@ -47,8 +45,7 @@ public class GetOperationClaimsHandlerTests
     [Fact]
     public async Task HandleRequestAsync_WithGitHubEnterprise_ReturnsAuthenticationClaim()
     {
-        var sdkInfo = new SdkInfo();
-        var handler = new GetOperationClaimsHandler(sdkInfo);
+        var handler = new GetOperationClaimsHandler();
         var request = new GetOperationClaimsRequest(
             "https://ghe.company.com/nuget/index.json",
             JObject.FromObject(
@@ -66,8 +63,7 @@ public class GetOperationClaimsHandlerTests
     [Fact]
     public async Task HandleRequestAsync_WithNullServiceIndexButGitHubPackageSource_ReturnsAuthenticationClaim()
     {
-        var sdkInfo = new SdkInfo();
-        var handler = new GetOperationClaimsHandler(sdkInfo);
+        var handler = new GetOperationClaimsHandler();
         var request = new GetOperationClaimsRequest(
             "https://nuget.pkg.github.com/owner/index.json",
             null

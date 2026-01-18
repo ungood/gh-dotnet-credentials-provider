@@ -50,13 +50,12 @@ internal static class Program
     {
         var logger = new StandardErrorLogger("GhCredentialProvider");
         var tokenProvider = new GitHubCliTokenProvider();
-        var sdkInfo = new SdkInfo();
         var requestHandlers = new NuGet.Protocol.Plugins.RequestHandlers();
         requestHandlers.TryAdd(
             MessageMethod.GetAuthenticationCredentials,
             new GetAuthenticationCredentialsHandler(tokenProvider)
         );
-        requestHandlers.TryAdd(MessageMethod.GetOperationClaims, new GetOperationClaimsHandler(sdkInfo));
+        requestHandlers.TryAdd(MessageMethod.GetOperationClaims, new GetOperationClaimsHandler());
         requestHandlers.TryAdd(MessageMethod.SetLogLevel, new SetLogLevelHandler());
         requestHandlers.TryAdd(MessageMethod.Initialize, new InitializeHandler());
 
