@@ -39,7 +39,7 @@ run = '''
 depends = ["build-release"]
 description = "Publish the package to NuGet.org"
 run = '''
-  dotnet nuget push ./artifacts/*.nupkg \
+  dotnet nuget push ./src/GhCredentialProvider/bin/Release/*.nupkg \
     --api-key ${NUGET_API_KEY} \
     --source https://api.nuget.org/v3/index.json \
     --skip-duplicate
