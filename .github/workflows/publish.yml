@@ -19,8 +19,8 @@ jobs:
       - name: Extract version from release tag
         id: get_version
         run: |
-          VERSION="${{ github.event.release.tag_name }}"
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          TAG="${{ github.event.release.tag_name }}"
+          echo "version=${TAG#v}" >> $GITHUB_OUTPUT
           echo "Extracted version: $VERSION"
       
       - name: Restore dependencies
