@@ -22,15 +22,17 @@ internal class GetAuthenticationCredentialsHandler(ITokenProvider tokenProvider)
         {
             var uriString = request.Uri?.ToString() ?? "";
             if (!GitHubHostDetector.IsGitHubHost(uriString))
-                return CreateErrorResponse(MessageResponseCode.NotFound,
-                    $"Credentials for URI {request.Uri} not found");
+            {
+                Logger.Log(LogLevel.Verbose, $"Not a GitHub host, skipping: {request.Uri}");
+                return new GetAuthenticationCredentialsResponse(
+                    null, null, null, null, MessageResponseCode.NotFound);
+            }
 
             var hostname = GitHubHostDetector.ExtractHostname(uriString) ?? "github.com";
             var token = await _tokenProvider.GetTokenAsync(hostname);
 
             if (string.IsNullOrWhiteSpace(token))
-                return CreateErrorResponse(MessageResponseCode.NotFound,
-                    $"Credentials for URI {request.Uri} not found");
+                return CreateErrorResponse(MessageResponseCode.NotFound, "No GitHub token available");
 
             Logger.Log(LogLevel.Verbose, $"Found credentials for URI {request.Uri}");
             return new GetAuthenticationCredentialsResponse(
