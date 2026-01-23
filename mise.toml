@@ -12,11 +12,7 @@ run = '''
     echo "VERSION is required"
     exit 1
   fi
-  dotnet build src/GhCredentialProvider/GhCredentialProvider.csproj \
-    -c Release \
-    --no-restore \
-    -p:Version=$VERSION \
-    -p:PackageVersion=$VERSION \
+  dotnet build src/GhCredentialProvider/GhCredentialProvider.csproj -c Release --no-restore -p:Version=$VERSION -p:PackageVersion=$VERSION
 '''
 
 [tasks.test]
