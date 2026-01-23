@@ -1,10 +1,10 @@
-using GhCredentialProvider.GitHub;
-using GhCredentialProvider.RequestHandlers;
+using GithubCredentialProvider.GitHub;
+using GithubCredentialProvider.RequestHandlers;
 using NSubstitute;
 using NuGet.Protocol.Plugins;
 using Xunit;
 
-namespace GhCredentialProvider.Tests.Handlers;
+namespace GithubCredentialProvider.Tests.Handlers;
 
 public class GetAuthenticationCredentialsHandlerTests
 {

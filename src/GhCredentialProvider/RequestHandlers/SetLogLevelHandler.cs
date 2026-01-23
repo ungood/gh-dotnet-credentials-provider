@@ -1,6 +1,6 @@
 using NuGet.Protocol.Plugins;
 
-namespace GhCredentialProvider.RequestHandlers;
+namespace GithubCredentialProvider.RequestHandlers;
 
 internal class SetLogLevelHandler : BaseRequestHandler<SetLogLevelRequest, SetLogLevelResponse>
 {

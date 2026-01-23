@@ -1,6 +1,6 @@
 using NuGet.Common;
 
-namespace GhCredentialProvider.Logging;
+namespace GithubCredentialProvider.Logging;
 
 internal class StandardErrorLogger(string className)
 {

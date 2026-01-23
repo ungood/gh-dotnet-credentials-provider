@@ -1,7 +1,7 @@
-using GhCredentialProvider.GitHub;
+using GithubCredentialProvider.GitHub;
 using NuGet.Protocol.Plugins;
 
-namespace GhCredentialProvider.RequestHandlers;
+namespace GithubCredentialProvider.RequestHandlers;
 
 internal class GetOperationClaimsHandler
     : BaseRequestHandler<GetOperationClaimsRequest, GetOperationClaimsResponse>
