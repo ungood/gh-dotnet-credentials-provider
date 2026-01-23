@@ -1,7 +1,7 @@
 using NuGet.Common;
 using NuGet.Protocol.Plugins;
 
-namespace GhCredentialProvider.RequestHandlers;
+namespace GithubCredentialProvider.RequestHandlers;
 
 internal class InitializeHandler
     : BaseRequestHandler<InitializeRequest, InitializeResponse>

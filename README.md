@@ -1,4 +1,4 @@
-# GitHub NuGet Credential Provider
+# Github Nuget Credential Provider
 
 A NuGet cross-platform credential provider plugin that uses the GitHub CLI (`gh`) to authenticate with GitHub Package feeds.
 
@@ -17,9 +17,10 @@ A NuGet cross-platform credential provider plugin that uses the GitHub CLI (`gh`
 
 ## Installation
 
-TODO: Publish to nuget so this can be installed as a tool.
-
-`mise install` - Note that this only works on Mac and Linux for now.  
+Install from NuGet:
+```bash
+dotnet tool install -g nuget-plugin-github-credential-provider
+```
 
 ## Configuration
 
@@ -28,14 +29,14 @@ Authenticate with GitHub CLI:
 gh auth login
 ```
 
-Or set an environment variable:
-```bash
-export GH_TOKEN=ghp_your_token_here
-```
-
-For GitHub Enterprise:
+Or for GitHub Enterprise:
 ```bash
 gh auth login --hostname ghe.company.com
+```
+
+Or set an environment variable:
+```bash
+export GITHUB_TOKEN=ghp_your_token_here
 ```
 
 ## Usage
@@ -43,5 +44,5 @@ gh auth login --hostname ghe.company.com
 The plugin automatically provides credentials when accessing GitHub Package feeds:
 
 ```bash
-dotnet restore --source https://nuget.pkg.github.com/owner/index.json
+dotnet restore --source https://nuget.pkg.github.com/example/index.json
 ```

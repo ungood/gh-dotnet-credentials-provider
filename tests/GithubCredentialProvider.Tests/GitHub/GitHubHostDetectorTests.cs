@@ -1,7 +1,7 @@
-using GhCredentialProvider.GitHub;
+using GithubCredentialProvider.GitHub;
 using Xunit;
 
-namespace GhCredentialProvider.Tests.GitHub;
+namespace GithubCredentialProvider.Tests.GitHub;
 
 public class GitHubHostDetectorTests
 {

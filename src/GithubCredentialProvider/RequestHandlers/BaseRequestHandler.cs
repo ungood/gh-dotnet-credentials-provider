@@ -1,10 +1,10 @@
-using GhCredentialProvider.Logging;
+using GithubCredentialProvider.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using NuGet.Common;
 using NuGet.Protocol.Plugins;
 
-namespace GhCredentialProvider.RequestHandlers;
+namespace GithubCredentialProvider.RequestHandlers;
 
 internal abstract class BaseRequestHandler<TRequest, TResponse> : IRequestHandler
     where TResponse : class

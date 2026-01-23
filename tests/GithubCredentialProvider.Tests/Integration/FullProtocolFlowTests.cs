@@ -1,8 +1,8 @@
-using GhCredentialProvider.GitHub;
+using GithubCredentialProvider.GitHub;
 using NSubstitute;
 using Xunit;
 
-namespace GhCredentialProvider.Tests.Integration;
+namespace GithubCredentialProvider.Tests.Integration;
 
 public class FullProtocolFlowTests
 {

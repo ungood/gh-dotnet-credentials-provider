@@ -12,7 +12,7 @@ run = '''
     echo "VERSION is required"
     exit 1
   fi
-  dotnet build src/GhCredentialProvider/GhCredentialProvider.csproj -c Release --no-restore -p:Version=$VERSION -p:PackageVersion=$VERSION
+  dotnet build src/GithubCredentialProvider/GithubCredentialProvider.csproj -c Release --no-restore -p:Version=$VERSION -p:PackageVersion=$VERSION
 '''
 
 [tasks.test]
@@ -31,15 +31,15 @@ run = "dotnet restore"
 depends = ["build"]
 description = "Install the locally-built plugin, for development testing."
 run = '''
-  dotnet tool uninstall -g GhCredentialProvider 2>/dev/null || true
-  dotnet tool install -g --add-source src/GhCredentialProvider/bin/Debug GhCredentialProvider
+  dotnet tool uninstall -g nuget-plugin-github-credential-provider 2>/dev/null || true
+  dotnet tool install -g --add-source src/GithubCredentialProvider/bin/Debug nuget-plugin-github-credential-provider
 '''
 
 [tasks.publish]
 depends = ["build-release"]
 description = "Publish the package to NuGet.org"
 run = '''
-  dotnet nuget push ./src/GhCredentialProvider/bin/Release/*.nupkg \
+  dotnet nuget push ./src/GithubCredentialProvider/bin/Release/*.nupkg \
     --api-key ${NUGET_API_KEY} \
     --source https://api.nuget.org/v3/index.json \
     --skip-duplicate

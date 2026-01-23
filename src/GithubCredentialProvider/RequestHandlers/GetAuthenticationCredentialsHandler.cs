@@ -1,8 +1,8 @@
-using GhCredentialProvider.GitHub;
+using GithubCredentialProvider.GitHub;
 using NuGet.Common;
 using NuGet.Protocol.Plugins;
 
-namespace GhCredentialProvider.RequestHandlers;
+namespace GithubCredentialProvider.RequestHandlers;
 
 /// <param name="tokenProvider">An <see cref="ITokenProvider" /> to use for retrieving tokens.</param>
 internal class GetAuthenticationCredentialsHandler(ITokenProvider tokenProvider)

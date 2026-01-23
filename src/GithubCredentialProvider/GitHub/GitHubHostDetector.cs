@@ -1,4 +1,4 @@
-namespace GhCredentialProvider.GitHub;
+namespace GithubCredentialProvider.GitHub;
 
 public static class GitHubHostDetector
 {

@@ -1,8 +1,8 @@
-using GhCredentialProvider.RequestHandlers;
+using GithubCredentialProvider.RequestHandlers;
 using NuGet.Protocol.Plugins;
 using Xunit;
 
-namespace GhCredentialProvider.Tests.Handlers;
+namespace GithubCredentialProvider.Tests.Handlers;
 
 public class InitializeHandlerTests
 {

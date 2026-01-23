@@ -1,8 +1,8 @@
 using System.Diagnostics;
-using GhCredentialProvider.Logging;
+using GithubCredentialProvider.Logging;
 using NuGet.Common;
 
-namespace GhCredentialProvider.GitHub;
+namespace GithubCredentialProvider.GitHub;
 
 public class GitHubCliTokenProvider : ITokenProvider
 {

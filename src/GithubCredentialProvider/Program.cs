@@ -1,10 +1,10 @@
-using GhCredentialProvider.GitHub;
-using GhCredentialProvider.Logging;
-using GhCredentialProvider.RequestHandlers;
+using GithubCredentialProvider.GitHub;
+using GithubCredentialProvider.Logging;
+using GithubCredentialProvider.RequestHandlers;
 using NuGet.Common;
 using NuGet.Protocol.Plugins;
 
-namespace GhCredentialProvider;
+namespace GithubCredentialProvider;
 
 internal static class Program
 {
@@ -21,7 +21,7 @@ internal static class Program
         }
 
         var tokenSource = new CancellationTokenSource();
-        var logger = new StandardErrorLogger("GhCredentialProvider");
+        var logger = new StandardErrorLogger("GithubCredentialProvider");
 
         logger.Log(LogLevel.Verbose, "Entered nuget credentials plugin");
 
@@ -48,7 +48,7 @@ internal static class Program
 
     private static async Task<int> MainInternal(CancellationTokenSource tokenSource)
     {
-        var logger = new StandardErrorLogger("GhCredentialProvider");
+        var logger = new StandardErrorLogger("GithubCredentialProvider");
         var tokenProvider = new GitHubCliTokenProvider();
         var requestHandlers = new NuGet.Protocol.Plugins.RequestHandlers();
         requestHandlers.TryAdd(
@@ -78,7 +78,7 @@ internal static class Program
         CancellationToken cancellationToken
     )
     {
-        var logger = new StandardErrorLogger("GhCredentialProvider");
+        var logger = new StandardErrorLogger("GithubCredentialProvider");
         SemaphoreSlim semaphore = new(0);
 
         plugin.Connection.Faulted += (sender, a) =>
