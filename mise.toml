@@ -7,7 +7,17 @@ run = "dotnet build"
 
 [tasks.build-release]
 description = "Build the solution in Release configuration"
-run = "dotnet build -c Release"
+run = '''
+  if [ -z "$VERSION" ]; then
+    echo "VERSION is required"
+    exit 1
+  fi
+  dotnet build src/GhCredentialProvider/GhCredentialProvider.csproj \
+    -c Release \
+    --no-restore \
+    -p:Version=$VERSION \
+    -p:PackageVersion=$VERSION \
+'''
 
 [tasks.test]
 description = "Run all tests"
@@ -27,4 +37,14 @@ description = "Install the locally-built plugin, for development testing."
 run = '''
   dotnet tool uninstall -g GhCredentialProvider 2>/dev/null || true
   dotnet tool install -g --add-source src/GhCredentialProvider/bin/Debug GhCredentialProvider
+'''
+
+[tasks.publish]
+depends = ["build-release"]
+description = "Publish the package to NuGet.org"
+run = '''
+  dotnet nuget push ./artifacts/*.nupkg \
+    --api-key ${NUGET_API_KEY} \
+    --source https://api.nuget.org/v3/index.json \
+    --skip-duplicate
 '''

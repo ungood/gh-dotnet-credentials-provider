@@ -5,6 +5,10 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
 
+    <!-- Default version parts; CI sets Version/PackageVersion explicitly -->
+    <VersionPrefix>0.1.0</VersionPrefix>
+    <VersionSuffix>$([System.DateTime]::UtcNow.ToString("yyyyMMdd"))</VersionSuffix>
+
     <!-- Code quality & analysis -->
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>

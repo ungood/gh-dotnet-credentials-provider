@@ -1,0 +1,33 @@
+name: Publish NuGet Package
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  publish:
+    name: Build and Publish NuGet Package
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      
+      - name: Setup mise
+        uses: jdx/mise-action@v3
+
+      - name: Extract version from release tag
+        id: get_version
+        run: |
+          VERSION="${{ github.event.release.tag_name }}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Extracted version: $VERSION"
+      
+      - name: Restore dependencies
+        run: mise run restore      
+      
+      - name: Build (and pack)
+        run: mise run publish
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+          VERSION: ${{ steps.get_version.outputs.version }}    
